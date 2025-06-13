@@ -2,6 +2,7 @@
 import {reactive, ref} from "vue";
 import type {LoginOptions} from "../../models/models.ts";
 import {useRouter} from "vue-router";
+import {useBackGroundImageStore} from "../../store/modules/backgroundImageStore.ts";
 
 const router = useRouter();
 const optionLogSize = ref<string>("50px");
@@ -32,13 +33,14 @@ const goHome = () => {
 - Linux云服务器
 - 电脑本地文件存储
 - 七牛云存储*/
-
+const backGroundImageStore = useBackGroundImageStore();
 </script>
 
 <template>
   <div class="login-app">
     <div class="login-container">
-      <div class="left-container"></div>
+      <div class="left-container"
+           :style="{backgroundImage:  'url(' + backGroundImageStore.getLoginBackGroundImageURL + ')' }"></div>
       <div class="right-container">
         <div class="title">欢迎使用 password-QY</div>
         <div class="please">请选择您的登录方式</div>
@@ -77,7 +79,7 @@ const goHome = () => {
 
     .left-container {
       width: 50%;
-      background-image: url("/images/bg-left.png");
+      /*background-image: url("/images/bg-left.png"); 已使用Pinia 结合CSS实现动态背景图*/
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;

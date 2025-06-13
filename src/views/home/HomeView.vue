@@ -125,7 +125,8 @@ const changeGlobalTheme = () => {
 }
 //跳转至系统设置页面;
 const goSettingsView = () => {
-  console.log("跳转至系统设置页面")
+  console.log("跳转至系统设置页面");
+  router.push('/settings');
 }
 //打开密码回收站弹窗;
 const openDeleteList = () => {
@@ -375,7 +376,7 @@ const selectFavorite = (index: number) => {
         <template #extra>
           <div class="password-card-actions">
             <a-tooltip content="点击前往个人中心">
-              <a-button type="primary">
+              <a-button type="primary" @click="router.push('/userProfile')">
                 <template #icon>
                   <icon-user/>
                 </template>
@@ -436,7 +437,7 @@ const selectFavorite = (index: number) => {
                   <template #icon>
                     <icon-settings/>
                   </template>
-                  <template #default>系统设置</template>
+                  <template #default >系统设置</template>
                 </a-doption>
                 <a-doption @click="openDeleteList">
                   <template #icon>
@@ -614,10 +615,16 @@ const selectFavorite = (index: number) => {
       width: 100%;
       display: flex;
       flex-direction: column;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     .tag-card {
       flex: 1;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 
       :deep(.arco-card-body) {
         overflow-y: auto;
@@ -672,6 +679,9 @@ const selectFavorite = (index: number) => {
       height: 100%;
       display: flex;
       flex-direction: column;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 
       :deep(.arco-card-body) {
         flex: 1;

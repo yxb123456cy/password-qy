@@ -70,6 +70,17 @@ const outerPaths: RouteRecordRaw[] = [
             title: "个人中心",
         },
     },
+    {
+        path: "/settings",
+        name: "settings",
+        // route level code-splitting
+        // this generates a separate chunk (About.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import("../views/settings/SettingView.vue"),
+        meta: {
+            title: "系统设置",
+        },
+    },
 
     ...commonRoute,
 ];
