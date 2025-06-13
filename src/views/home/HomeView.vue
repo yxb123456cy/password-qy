@@ -157,6 +157,16 @@ const generateAIPassword = () => {
   // 这里可以添加AI生成密码的逻辑
   //
 };
+const currentSelectedTag = ref<number | null>(null);
+const currentSelectedFavorite = ref<number | null>(null);
+const selectTag = (index: number) => {
+  currentSelectedTag.value = index;
+  currentSelectedFavorite.value=null;
+}
+const selectFavorite = (index: number) => {
+  currentSelectedTag.value = null;
+  currentSelectedFavorite.value = index;
+}
 </script>
 
 <template>
@@ -166,7 +176,10 @@ const generateAIPassword = () => {
       <!-- 标签栏卡片 -->
       <a-card class="tag-card" title="标签管理">
         <a-list>
-          <a-list-item v-for="tag in tagList" :key="tag.name">
+          <a-list-item v-for="(tag,index) in tagList" :key="tag.name"
+                       @click="selectTag(index)"
+                       :class="{'tag-selected': currentSelectedTag===index, 'tag-list-item':currentSelectedTag!==index}"
+          >
             <div class="tag-item">
               <span>{{ tag.name }}</span>
               <a-tag>{{ tag.count }}</a-tag>
@@ -178,7 +191,10 @@ const generateAIPassword = () => {
       <!-- 收藏栏卡片 -->
       <a-card class="favorite-card" title="收藏密码">
         <a-list>
-          <a-list-item v-for="item in favoriteList" :key="item.id">
+          <a-list-item v-for="(item,index) in favoriteList" :key="item.id"
+                       @click="selectFavorite(index)"
+                       :class="{'favorite-selected': currentSelectedFavorite===index, 'favorite-list-item':currentSelectedFavorite!==index}"
+          >
             <div class="favorite-item">
               <a-avatar shape="square" :style="{ backgroundColor: '#3370ff' }">{{ item.title.charAt(0) }}</a-avatar>
               <div class="favorite-info">
@@ -386,6 +402,33 @@ const generateAIPassword = () => {
 </template>
 
 <style scoped lang="less">
+.favorite-selected {
+  background-color: #7BE188;
+}
+
+.tag-selected {
+  background-color: #57A9FB;
+}
+
+.favorite-list-item {
+  transition: all 0.1s;
+}
+
+.favorite-list-item:hover {
+  background-color: rgba(123, 225, 136, 0.45);
+
+  cursor: pointer;
+}
+
+.tag-list-item {
+  transition: all 0.1s;
+}
+
+.tag-list-item:hover {
+  background-color: rgba(137, 233, 224, 0.85);
+  cursor: pointer;
+}
+
 .home-container {
   display: flex;
   gap: 16px;
@@ -434,6 +477,7 @@ const generateAIPassword = () => {
       .favorite-item {
         display: flex;
         align-items: center;
+
         gap: 12px;
 
         .favorite-info {
