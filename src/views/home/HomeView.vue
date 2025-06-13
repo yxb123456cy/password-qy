@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref} from 'vue';
+import {ref, computed} from 'vue';
 import {useRouter} from "vue-router";
 import type {favoriteItemType, passwordItemType, tagType} from "../../models/models.ts";
 
@@ -64,7 +64,8 @@ const tagList = ref<tagType[]>([
 ]);
 const passwordListView = ref<string>("card");
 
-import {Message} from '@arco-design/web-vue';
+import {Message, Modal} from '@arco-design/web-vue';
+import PasswordForm from '../../components/PasswordForm.vue';
 
 // 切换密码收藏状态
 const togglePasswordStar = (item: passwordItemType, toStar: boolean) => {
@@ -144,11 +145,154 @@ const toggleLock = () => {
   isLocked.value = !isLocked.value;
 };
 
-// 添加新密码（示例函数）
+// 抽屉可见性控制
+const drawerVisible = ref(false);
+const isEditMode = ref(false);
+const currentEditPassword = ref<passwordItemType | null>(null);
+
+// 添加新密码-打开新增密码弹窗;
 const addPassword = () => {
-  console.log('添加新密码');
-  // 这里可以添加弹窗或导航到添加密码的页面
-  // 打开新增密码的抽屉;
+  isEditMode.value = false;
+  currentEditPassword.value = null;
+  drawerVisible.value = true;
+};
+
+// 编辑密码
+const editPassword = (item: passwordItemType) => {
+  isEditMode.value = true;
+  currentEditPassword.value = {...item};
+  drawerVisible.value = true;
+};
+
+// 处理表单提交
+const handleFormSubmit = (formData: passwordItemType) => {
+  if (isEditMode.value) {
+    // 更新现有密码
+    const index = passwordList.value.findIndex(item => item.id === formData.id);
+    if (index !== -1) {
+      passwordList.value[index] = formData;
+      
+      // 如果是收藏项，也需要更新收藏列表
+      if (formData.star) {
+        const favIndex = favoriteList.value.findIndex(item => item.id === formData.id);
+        if (favIndex !== -1) {
+          favoriteList.value[favIndex] = {
+            id: formData.id,
+            title: formData.title,
+            username: formData.username
+          };
+        }
+      }
+      
+      Message.success('密码已更新');
+    }
+  } else {
+    // 添加新密码
+    passwordList.value.push(formData);
+    
+    // 如果设置了收藏，添加到收藏列表
+    if (formData.star) {
+      favoriteList.value.push({
+        id: formData.id,
+        title: formData.title,
+        username: formData.username
+      });
+    }
+    // 更新标签列表
+    updateTagList();
+    Message.success('密码已添加');
+  }
+  
+  drawerVisible.value = false;
+};
+
+// 关闭抽屉
+const closeDrawer = () => {
+  drawerVisible.value = false;
+};
+
+// 删除密码
+const deletePassword = (item: passwordItemType) => {
+  Modal.warning({
+    title: '确认删除',
+    content: `确定要删除「${item.title}」吗？此操作不可恢复。`,
+    okText: '确认删除',
+    cancelText: '取消',
+    onOk: () => {
+      // 从密码列表中删除
+      const index = passwordList.value.findIndex(p => p.id === item.id);
+      if (index !== -1) {
+        passwordList.value.splice(index, 1);
+      }
+      
+      // 如果在收藏列表中，也需要删除
+      if (item.star) {
+        const favIndex = favoriteList.value.findIndex(f => f.id === item.id);
+        if (favIndex !== -1) {
+          favoriteList.value.splice(favIndex, 1);
+        }
+      }
+      
+      // 更新标签列表
+      updateTagList();
+      
+      Message.success('密码已删除');
+    }
+  });
+};
+
+// 更新标签列表
+const updateTagList = () => {
+  // 创建一个Map来存储标签及其计数
+  const tagMap = new Map<string, number>();
+  tagMap.set('全部', passwordList.value.length);
+  
+  // 遍历所有密码项的标签
+  passwordList.value.forEach(item => {
+    item.tags.forEach(tag => {
+      const count = tagMap.get(tag) || 0;
+      tagMap.set(tag, count + 1);
+    });
+  });
+  
+  // 转换为标签列表格式
+  tagList.value = Array.from(tagMap.entries()).map(([name, count]) => ({ name, count }));
+};
+
+// 搜索功能-搜索关键字;
+const searchKeyword = ref('');
+
+const filteredPasswordList = computed(() => {
+  if (!searchKeyword.value) {
+    // 如果选择了标签，按标签筛选
+    if (currentSelectedTag.value !== null) {
+      const selectedTag = tagList.value[currentSelectedTag.value].name;
+      if (selectedTag === '全部') {
+        return passwordList.value;
+      }
+      return passwordList.value.filter(item => item.tags.includes(selectedTag));
+    }
+    // 如果选择了收藏，按收藏筛选
+    else if (currentSelectedFavorite.value !== null) {
+      const selectedFavoriteId = favoriteList.value[currentSelectedFavorite.value].id;
+      return passwordList.value.filter(item => item.id === selectedFavoriteId);
+    }
+    return passwordList.value;
+  }
+  // 搜索关键词筛选 使用字符串的includes API;
+  const keyword = searchKeyword.value.toLowerCase();
+  return passwordList.value.filter(item => 
+    item.title.toLowerCase().includes(keyword) ||
+    item.username.toLowerCase().includes(keyword) ||
+    item.website.toLowerCase().includes(keyword) ||
+    item.remark.toLowerCase().includes(keyword) ||
+    item.tags.some(tag => tag.toLowerCase().includes(keyword))
+  );
+});
+
+// 处理搜索 搜索框表单Value绑定;
+const handleSearch = (value: string) => {
+  searchKeyword.value = value;
 };
 
 // 使用AI生成密码（示例函数）
@@ -157,11 +301,12 @@ const generateAIPassword = () => {
   // 这里可以添加AI生成密码的逻辑
   //
 };
+// 样式绑定;
 const currentSelectedTag = ref<number | null>(null);
 const currentSelectedFavorite = ref<number | null>(null);
 const selectTag = (index: number) => {
   currentSelectedTag.value = index;
-  currentSelectedFavorite.value=null;
+  currentSelectedFavorite.value = null;
 }
 const selectFavorite = (index: number) => {
   currentSelectedTag.value = null;
@@ -214,7 +359,13 @@ const selectFavorite = (index: number) => {
           <div class="right-panel-card-title" style="display: flex;gap:4vw;">
             <div class="password-card-title">密码管理</div>
             <div class="extra-search">
-              <a-input-search :style="{ width: '320px', display: 'inline-block' }" placeholder="搜索..." search-button/>
+              <a-input-search 
+                :style="{ width: '320px', display: 'inline-block' }" 
+                placeholder="搜索..." 
+                search-button
+                v-model="searchKeyword"
+                @search="handleSearch"
+              />
             </div>
           </div>
 
@@ -308,7 +459,7 @@ const selectFavorite = (index: number) => {
 
         <!-- 密码卡片列表 -->
         <div class="password-list">
-          <a-card v-for="item in passwordList" :key="item.id" class="password-item">
+          <a-card v-for="item in filteredPasswordList" :key="item.id" class="password-item">
             <template #title>
               <div class="password-item-title">
                 <a-avatar shape="square" :style="{ backgroundColor: '#3370ff' }">{{ item.title.charAt(0) }}</a-avatar>
@@ -334,14 +485,14 @@ const selectFavorite = (index: number) => {
                     </a-tooltip>
                   </template>
                 </a-button>
-                <a-button type="text" size="mini">
+                <a-button type="text" size="mini" @click="editPassword(item)">
                   <template #icon>
                     <a-tooltip content="修改">
                       <icon-edit/>
                     </a-tooltip>
                   </template>
                 </a-button>
-                <a-button type="text" size="mini" status="danger">
+                <a-button type="text" size="mini" status="danger" @click="deletePassword(item)">
                   <template #icon>
                     <a-tooltip content="删除">
                       <icon-delete/>
@@ -398,6 +549,21 @@ const selectFavorite = (index: number) => {
         </div>
       </a-card>
     </div>
+    
+    <!-- 添加/编辑密码抽屉 -->
+    <a-drawer
+      :visible="drawerVisible"
+      :width="500"
+      :title="isEditMode ? '编辑密码' : '添加密码'"
+      @cancel="closeDrawer"
+    >
+      <PasswordForm
+        :is-edit="isEditMode"
+        :password-data="currentEditPassword"
+        @submit="handleFormSubmit"
+        @cancel="closeDrawer"
+      />
+    </a-drawer>
   </div>
 </template>
 
