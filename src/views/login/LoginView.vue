@@ -5,16 +5,18 @@ import {useRouter} from "vue-router";
 
 const router = useRouter();
 const optionLogSize = ref<string>("50px");
+const optionLogHeight = ref<string>('40px');
+
 const LoginOptionList = reactive<LoginOptions[]>(
     [
-      {name: "阿里云OSS", id: 1, logo: "/images/cos-logo.png"},
-      {name: "华为云存储", id: 2, logo: "/images/cos-logo.png"},
-      {name: "腾讯云cos", id: 3, logo: "/images/cos-logo.png"},
-      {name: "百度云存储", id: 4, logo: "/images/cos-logo.png"},
-      {name: "七牛云存储", id: 5, logo: "/images/cos-logo.png"},
-      {name: "Linux云服务器", id: 6, logo: "/images/cos-logo.png"},
-      {name: "电脑本地文件存储", id: 8, logo: "/images/cos-logo.png"},
-      {name: "浏览器本地缓存", id: 8, logo: "/images/cos-logo.png"},
+      {name: "阿里云OSS", id: 1, logo: "/images/阿里云logo.jpg", theme: "#FF9A2E",},
+      {name: "华为云存储", id: 2, logo: "/images/华为云logo.png", theme: "#CB272D",},
+      {name: "腾讯云cos", id: 3, logo: "/images/cos-logo.png", theme: "#165DFF",},
+      {name: "百度云存储", id: 4, logo: "/images/baiducloud-color.png", theme: "#c9cdd4",},
+      {name: "七牛云存储", id: 5, logo: "/images/七牛云logo.png", theme: "#114BA3",},
+      {name: "Linux云服务器", id: 6, logo: "/images/linux-logo.png", theme: "#FBACA3",},
+      {name: "电脑本地文件存储", id: 8, logo: "/images/windows-logo.png", theme: "#C396ED",},
+      {name: "浏览器本地缓存", id: 8, logo: "/images/google-color.png", theme: "#F979B7",},
     ]
 )
 const goHome = () => {
@@ -42,9 +44,11 @@ const goHome = () => {
         <div class="please">请选择您的登录方式</div>
         <a-divider/>
         <div class="login-options-view">
-          <div class="login-option-item" v-for="(item,index) in LoginOptionList" :key="index" @click="goHome()">
+          <div class="login-option-item" v-for="(item,index) in LoginOptionList" :key="index" @click="goHome()"
+               :style="{backgroundColor: item.theme}"
+          >
             <div class="option-logo">
-              <img :src="item.logo" :alt="item.logo" :width="optionLogSize">
+              <img :src="item.logo" :alt="item.logo" :width="optionLogSize" :height="optionLogHeight">
             </div>
             <div class="option-name" style="margin-top: 5px">{{ item.name }}</div>
           </div>

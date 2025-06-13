@@ -3,6 +3,7 @@ export interface LoginOptions {
     id: number,
     // logo URL
     logo: string,
+    theme: string,
 }
 
 export interface tagType {
