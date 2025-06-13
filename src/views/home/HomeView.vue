@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import {ref} from 'vue';
 import {useRouter} from "vue-router";
+import type {favoriteItemType, passwordItemType, tagType} from "../../models/models.ts";
 
+const router = useRouter();
 // 模拟密码数据
-const passwordList = ref([
+const passwordList = ref<passwordItemType[]>([
   {
     id: 1,
     title: '个人邮箱',
@@ -11,7 +13,8 @@ const passwordList = ref([
     username: 'user1@example.com',
     password: '********',
     website: 'mail.example.com',
-    tags: ['邮箱', '个人']
+    tags: ['邮箱', '个人'],
+    star: true,
   },
   {
     id: 2,
@@ -20,7 +23,8 @@ const passwordList = ref([
     username: 'work@company.com',
     password: '********',
     website: 'mail.company.com',
-    tags: ['邮箱', '工作']
+    tags: ['邮箱', '工作'],
+    star: false,
   },
   {
     id: 3,
@@ -29,7 +33,8 @@ const passwordList = ref([
     username: 'devuser',
     password: '********',
     website: 'github.com',
-    tags: ['开发', '工具']
+    tags: ['开发', '工具'],
+    star: true,
   },
   {
     id: 4,
@@ -38,21 +43,81 @@ const passwordList = ref([
     username: 'socialuser',
     password: '********',
     website: 'social.example.com',
-    tags: ['社交', '娱乐']
+    tags: ['社交', '娱乐'],
+    star: false,
   },
 ]);
+// 收藏列表
+const favoriteList = ref<favoriteItemType[]>([
+  {id: 1, title: '个人邮箱', username: 'user1@example.com'},
+  {id: 3, title: 'GitHub', username: 'devuser'},
+]);
+// 标签列表
+const tagList = ref<tagType[]>([
+  {name: '全部', count: 4},
+  {name: '邮箱', count: 2},
+  {name: '工作', count: 1},
+  {name: '开发', count: 1},
+  {name: '社交', count: 1},
+  {name: '娱乐', count: 1},
+  {name: '个人', count: 1},
+]);
 const passwordListView = ref<string>("card");
-const changePasswordListView = () => {
-  switch (passwordListView.value) {
-    case 'card':
-      passwordListView.value = "table";
-      break;
-    case "table":
-      passwordListView.value = "card";
-      break;
+
+import {Message} from '@arco-design/web-vue';
+
+// 切换密码收藏状态
+const togglePasswordStar = (item: passwordItemType, toStar: boolean) => {
+  // 查找密码项
+  const index = passwordList.value.findIndex((p) => p.id === item.id);
+  if (index === -1) return false;
+
+  // 如果当前状态已经是目标状态，则不需要操作
+  if (passwordList.value[index].star === toStar) {
+    Message.info(`该密码${toStar ? '已经在' : '不在'}收藏列表中`);
+    return false;
   }
+
+  // 更新密码项的收藏状态
+  passwordList.value[index].star = toStar;
+
+  // 更新收藏列表
+  if (toStar) {
+    // 添加到收藏列表
+    const favoriteItem: favoriteItemType = {
+      id: item.id,
+      username: item.username,
+      title: item.title,
+    };
+    favoriteList.value.push(favoriteItem);
+    Message.success('已添加到收藏');
+  } else {
+    // 从收藏列表中移除
+    const favIndex = favoriteList.value.findIndex(f => f.id === item.id);
+    if (favIndex !== -1) {
+      favoriteList.value.splice(favIndex, 1);
+      Message.success('已从收藏中移除');
+    }
+  }
+
+  return true;
+};
+
+// 将密码加入收藏列表
+const addPasswordToStarList = (item: passwordItemType) => {
+  togglePasswordStar(item, true);
+};
+
+// 从收藏列表中移除密码
+const removePasswordFromStarList = (item: passwordItemType) => {
+  togglePasswordStar(item, false);
+};
+
+const changePasswordListView = () => {
+  passwordListView.value = passwordListView.value === 'card' ? 'table' : 'card';
 }
-const router = useRouter();
+
+
 const defaultTheme = ref<string>("line");
 const changeGlobalTheme = () => {
   defaultTheme.value = defaultTheme.value === 'line' ? 'deep' : 'line';
@@ -70,22 +135,6 @@ const logout = () => {
   router.push("/");
 }
 
-// 标签列表
-const tagList = ref([
-  {name: '全部', count: 4},
-  {name: '邮箱', count: 2},
-  {name: '工作', count: 1},
-  {name: '开发', count: 1},
-  {name: '社交', count: 1},
-  {name: '娱乐', count: 1},
-  {name: '个人', count: 1},
-]);
-
-// 收藏列表
-const favoriteList = ref([
-  {id: 1, title: '个人邮箱', username: 'user1@example.com'},
-  {id: 3, title: 'GitHub', username: 'devuser'},
-]);
 
 // 是否锁定密码卡片
 const isLocked = ref(false);
@@ -149,8 +198,7 @@ const generateAIPassword = () => {
           <div class="right-panel-card-title" style="display: flex;gap:4vw;">
             <div class="password-card-title">密码管理</div>
             <div class="extra-search">
-              <a-input-search :style="{width:'320px',display:'inline-block'}" placeholder="搜索..."
-                              search-button/>
+              <a-input-search :style="{ width: '320px', display: 'inline-block' }" placeholder="搜索..." search-button/>
             </div>
           </div>
 
@@ -185,7 +233,7 @@ const generateAIPassword = () => {
               </a-button>
             </a-tooltip>
 
-            <a-tooltip :content="isLocked? '解除锁定':'锁定'">
+            <a-tooltip :content="isLocked ? '解除锁定' : '锁定'">
               <a-button @click="toggleLock">
                 <template #icon>
                   <icon-unlock v-if="isLocked"/>
@@ -195,10 +243,10 @@ const generateAIPassword = () => {
               </a-button>
             </a-tooltip>
 
-            <a-tooltip :content="passwordListView==='card'?'切换为列表视图':'切换为卡片视图'">
+            <a-tooltip :content="passwordListView === 'card' ? '切换为列表视图' : '切换为卡片视图'">
               <a-button type="secondary" @click="changePasswordListView" size="large" style="width: 80px">
                 <template #icon>
-                  <icon-bookmark v-if="passwordListView==='card'"/>
+                  <icon-bookmark v-if="passwordListView === 'card'"/>
                   <icon-nav v-else/>
                 </template>
               </a-button>
@@ -255,17 +303,33 @@ const generateAIPassword = () => {
               <a-space>
                 <a-button type="text" size="mini">
                   <template #icon>
-                    <icon-copy/>
+                    <a-tooltip v-if="!item.star" content="收藏">
+                      <icon-star @click="addPasswordToStarList(item)"/>
+                    </a-tooltip>
+                    <a-tooltip v-else content="取消收藏">
+                      <icon-star-fill @click="removePasswordFromStarList(item)"/>
+                    </a-tooltip>
                   </template>
                 </a-button>
                 <a-button type="text" size="mini">
                   <template #icon>
-                    <icon-edit/>
+                    <a-tooltip content="复制">
+                      <icon-copy/>
+                    </a-tooltip>
+                  </template>
+                </a-button>
+                <a-button type="text" size="mini">
+                  <template #icon>
+                    <a-tooltip content="修改">
+                      <icon-edit/>
+                    </a-tooltip>
                   </template>
                 </a-button>
                 <a-button type="text" size="mini" status="danger">
                   <template #icon>
-                    <icon-delete/>
+                    <a-tooltip content="删除">
+                      <icon-delete/>
+                    </a-tooltip>
                   </template>
                 </a-button>
               </a-space>
@@ -336,7 +400,8 @@ const generateAIPassword = () => {
     gap: 16px;
     height: 100%;
 
-    .tag-card, .favorite-card {
+    .tag-card,
+    .favorite-card {
       width: 100%;
       display: flex;
       flex-direction: column;
