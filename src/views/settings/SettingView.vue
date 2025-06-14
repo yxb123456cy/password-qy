@@ -1,10 +1,15 @@
 <script setup lang="ts">
-import {ref, reactive} from 'vue';
+import {ref, reactive, onMounted} from 'vue';
 import {Message} from '@arco-design/web-vue';
 import {useRouter} from "vue-router";
 import {useBackGroundImageStore} from "../../store/modules/backgroundImageStore.ts";
 
 const router = useRouter();
+onMounted(() => {
+  const version = import.meta.env.VITE_VERSION as string;
+  console.log(version);
+})
+
 // 主题设置
 const themeOptions = [
   {label: '浅色模式', value: 'light'},

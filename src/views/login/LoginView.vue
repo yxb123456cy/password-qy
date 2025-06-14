@@ -7,8 +7,8 @@ import {Message} from '@arco-design/web-vue';
 import {initialize} from "../../hooks/init/initialize.ts";
 
 const router = useRouter();
-const optionLogSize = ref<string>("50px");
-const optionLogHeight = ref<string>('40px');
+const optionLogSize = ref<string>("80px");
+const optionLogHeight = ref<string>('80px');
 
 const LoginOptionList = reactive<LoginOptions[]>(
     [
@@ -43,7 +43,7 @@ const LoginOptionList = reactive<LoginOptions[]>(
         }
       },
       {
-        name: "SpringBootAPI", id: 8, logo: "/images/icons8-春天的标志-240.png", theme: "green", func: () => {
+        name: "SpringBootAPI", id: 7, logo: "/images/icons8-春天的标志-240.png", theme: "green", func: () => {
           Message.warning("使用SpringBootAPI的登录方式暂未实现! 请等待!");
         }
       },
@@ -51,6 +51,30 @@ const LoginOptionList = reactive<LoginOptions[]>(
         name: "浏览器本地缓存", id: 8, logo: "/images/google-color.png", theme: "#F979B7", func: () => {
           // 跳转至首页;
           goHome();
+        }
+      },
+      {
+        name: "Supabase", id: 9, logo: "/images/Supabase.png", theme: "#23C343", func: () => {
+          // 跳转至首页;
+          Message.warning("使用Supabase的登录方式暂未实现! 请等待!");
+        }
+      },
+      {
+        name: "minio", id: 10, logo: "/images/minio-1.svg", theme: "#FBACA3", func: () => {
+          // 跳转至首页;
+          Message.warning("使用Minio的登录方式暂未实现! 请等待!");
+        }
+      },
+      {
+        name: "ETCD", id: 11, logo: "/images/ETCD.png", theme: "#E8F7FF", func: () => {
+          // 跳转至首页;
+          Message.warning("使用ETCD的登录方式暂未实现! 请等待!");
+        }
+      },
+      {
+        name: "Redis", id: 12, logo: "/images/Redis-Labs.png", theme: "#F76560", func: () => {
+          // 跳转至首页;
+          Message.warning("使用Redis的登录方式暂未实现! 请等待!");
         }
       },
     ]
@@ -98,13 +122,11 @@ const backGroundImageStore = useBackGroundImageStore();
   align-items: center;
 
   .login-container {
-    width: 70%;
+    width: 90%;
     height: 80vh;
-    /*后续修改为渐变色*/
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.9);
     display: flex;
     flex-direction: row;
-
     .left-container {
       width: 50%;
       /*background-image: url("/images/bg-left.png"); 已使用Pinia 结合CSS实现动态背景图*/
@@ -129,19 +151,26 @@ const backGroundImageStore = useBackGroundImageStore();
 
         .login-option-item {
           text-align: center;
-          width: 25%;
-          padding: 20px;
+          width: 15%;
+          padding: 10px;
           border-radius: 10px;
           transition: all 0.3s;
           background-color: rgba(136, 136, 136, 0.15);
-          margin-top: 2vh;
-          margin-left: 1vw;
+          margin-top: 1vh;
+          margin-left: 1.5vw;
+          .option-name{
+            font-weight: bold;
+            font-size: 0.9rem;
+
+          }
         }
 
         .login-option-item:hover {
           transform: scale(1.1);
           cursor: pointer;
           box-shadow: 1px 1px rgba(0, 180, 42, 0.25);
+
+
         }
       }
 
