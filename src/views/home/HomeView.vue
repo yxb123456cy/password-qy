@@ -322,6 +322,11 @@ const selectFavorite = (index: number) => {
   currentSelectedTag.value = null;
   currentSelectedFavorite.value = index;
 }
+const cancelTagAndFavoriteFilter = () => {
+  // 都置为null;
+  currentSelectedTag.value = null;
+  currentSelectedFavorite.value = null;
+}
 </script>
 
 <template>
@@ -330,6 +335,12 @@ const selectFavorite = (index: number) => {
     <div class="left-panel">
       <!-- 标签栏卡片 -->
       <a-card class="tag-card" title="标签管理">
+        <template #extra v-if="currentSelectedTag!=null">
+          <a-tooltip content="当前是标签过滤状态生效中,点击可取消过滤~" position="rt">
+            <icon-filter size="25" class="tag-filter-icon" @click="cancelTagAndFavoriteFilter"/>
+          </a-tooltip>
+
+        </template>
         <a-list>
           <a-list-item v-for="(tag,index) in tagList" :key="tag.name"
                        @click="selectTag(index)"
@@ -345,6 +356,12 @@ const selectFavorite = (index: number) => {
 
       <!-- 收藏栏卡片 -->
       <a-card class="favorite-card" title="收藏密码">
+        <template #extra v-if="currentSelectedFavorite!=null">
+          <a-tooltip content="当前是收藏过滤状态生效中,点击可取消过滤~" position="rt">
+            <icon-filter size="25" class="tag-filter-icon" @click="cancelTagAndFavoriteFilter"/>
+          </a-tooltip>
+
+        </template>
         <a-list>
           <a-list-item v-for="(item,index) in favoriteList" :key="item.id"
                        @click="selectFavorite(index)"
@@ -561,7 +578,8 @@ const selectFavorite = (index: number) => {
           <div style="margin-top:1vh"><img src="https://password-xl.cn/assets/empty-Dnhuoe9-.svg" alt="none.svg"></div>
           <div><h2>当前暂无密码存储</h2></div>
           <div>
-            <a-button type="primary" size="large" style="border-radius: 15px" @click="addPassword" >添加我的第一个密码</a-button>
+            <a-button type="primary" size="large" style="border-radius: 15px" @click="addPassword">添加我的第一个密码
+            </a-button>
           </div>
         </div>
       </a-card>
@@ -589,6 +607,16 @@ const selectFavorite = (index: number) => {
 </template>
 
 <style scoped lang="less">
+.tag-filter-icon {
+  transition: all 0.1s;
+}
+
+.tag-filter-icon:hover {
+  cursor: pointer;
+  box-shadow: 1px 1px 1px #CB272D;
+  color: #CB272D;
+}
+
 .empty-list {
   display: flex;
   flex-direction: column;
