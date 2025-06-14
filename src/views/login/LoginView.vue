@@ -4,6 +4,7 @@ import type {LoginOptions} from "../../models/models.ts";
 import {useRouter} from "vue-router";
 import {useBackGroundImageStore} from "../../store/modules/backgroundImageStore.ts";
 import {Message} from '@arco-design/web-vue';
+import {initialize} from "../../hooks/init/initialize.ts";
 
 const router = useRouter();
 const optionLogSize = ref<string>("50px");
@@ -55,6 +56,7 @@ const LoginOptionList = reactive<LoginOptions[]>(
     ]
 )
 const goHome = () => {
+  initialize('localCache');
   console.log("跳转首页");
   router.push("/home");
   // 使用pinia保存选择的存储Type;
@@ -72,7 +74,8 @@ const backGroundImageStore = useBackGroundImageStore();
         <div class="please">请选择您的登录方式</div>
         <a-divider/>
         <div class="login-options-view">
-          <div class="login-option-item" v-for="(item,index) in LoginOptionList" :key="index" @click="item.func()" :style="{backgroundColor: item.theme}"
+          <div class="login-option-item" v-for="(item,index) in LoginOptionList" :key="index" @click="item.func()"
+               :style="{backgroundColor: item.theme}"
           >
             <div class="option-logo">
               <img :src="item.logo" :alt="item.logo" :width="optionLogSize" :height="optionLogHeight">

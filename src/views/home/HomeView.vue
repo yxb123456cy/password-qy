@@ -5,65 +5,21 @@ import type {favoriteItemType, passwordItemType, tagType} from "../../models/mod
 
 import {Message, Modal} from '@arco-design/web-vue';
 import PasswordForm from '../../components/PasswordForm.vue';
+import defaultStorageUtil from "../../utils/modules/LocalStorageUtil.ts";
 
 const router = useRouter();
+let s = defaultStorageUtil.get<passwordItemType[]>('passwordList')!;
+let u = defaultStorageUtil.get<favoriteItemType[]>('favoriteList')!;
+let v = defaultStorageUtil.get<tagType[]>('tagList')!;
 // 模拟密码数据
-const passwordList = ref<passwordItemType[]>([
-  {
-    id: 1,
-    title: '个人邮箱',
-    remark: "个人邮箱密码",
-    username: 'user1@example.com',
-    password: '********',
-    website: 'mail.example.com',
-    tags: ['邮箱', '个人'],
-    star: true,
-  },
-  {
-    id: 2,
-    title: '工作邮箱',
-    remark: "工作邮箱密码",
-    username: 'work@company.com',
-    password: '********',
-    website: 'mail.company.com',
-    tags: ['邮箱', '工作'],
-    star: false,
-  },
-  {
-    id: 3,
-    title: 'GitHub',
-    remark: "Github密码",
-    username: 'devuser',
-    password: '********',
-    website: 'github.com',
-    tags: ['开发', '工具'],
-    star: true,
-  },
-  {
-    id: 4,
-    title: '社交媒体',
-    remark: "个人社交媒体网站密码",
-    username: 'socialuser',
-    password: '********',
-    website: 'social.example.com',
-    tags: ['社交', '娱乐'],
-    star: false,
-  },
-]);
+const passwordList = ref<passwordItemType[]>([...s]);
 // 收藏列表
 const favoriteList = ref<favoriteItemType[]>([
-  {id: 1, title: '个人邮箱', username: 'user1@example.com'},
-  {id: 3, title: 'GitHub', username: 'devuser'},
+  ...u
 ]);
 // 标签列表
 const tagList = ref<tagType[]>([
-  {name: '全部', count: 4},
-  {name: '邮箱', count: 2},
-  {name: '工作', count: 1},
-  {name: '开发', count: 1},
-  {name: '社交', count: 1},
-  {name: '娱乐', count: 1},
-  {name: '个人', count: 1},
+  ...v
 ]);
 const passwordListView = ref<string>("card");
 
@@ -101,7 +57,7 @@ const togglePasswordStar = (item: passwordItemType, toStar: boolean) => {
       Message.success('已从收藏中移除');
     }
   }
-
+  defaultStorageUtil.set<favoriteItemType[]>('favoriteList', favoriteList.value);
   return true;
 };
 
@@ -203,6 +159,8 @@ const handleFormSubmit = (formData: passwordItemType) => {
     }
     // 更新标签列表
     updateTagList();
+    defaultStorageUtil.set<passwordItemType[]>("passwordList", passwordList.value);
+    defaultStorageUtil.set<favoriteItemType[]>('favoriteList', favoriteList.value);
     Message.success('添加密码成功');
   }
   drawerVisible.value = false;
@@ -241,6 +199,8 @@ const deletePassword = (item: passwordItemType) => {
         }
       }
 
+      defaultStorageUtil.set<passwordItemType[]>("passwordList", passwordList.value);
+      defaultStorageUtil.set<favoriteItemType[]>('favoriteList', favoriteList.value);
       // 更新标签列表
       updateTagList();
       currentSelectedFavorite.value = null;
@@ -266,6 +226,7 @@ const updateTagList = () => {
 
   // 转换为标签列表格式
   tagList.value = Array.from(tagMap.entries()).map(([name, count]) => ({name, count}));
+  defaultStorageUtil.set<tagType[]>('tagList', tagList.value);
 };
 
 // 搜索功能-搜索关键字;

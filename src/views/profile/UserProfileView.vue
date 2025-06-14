@@ -2,17 +2,17 @@
 import {ref, reactive} from 'vue';
 import {Message} from "@arco-design/web-vue";
 import {useRouter} from "vue-router";
+import type User from "../../models/user/user.ts";
+import defaultStorageUtil from "../../utils/modules/LocalStorageUtil.ts";
 
 const router = useRouter();
+
+const defaultUser: User = defaultStorageUtil.get('user')!;
 // 用户信息数据
-const userInfo = reactive({
-  username: '轻叶',
-  email: 'zhangsan@example.com',
-  avatar: 'https://th.bing.com/th/id/OIP.NHJWTOPxa3ZQmW99bQp2EQHaHa?rs=1&pid=ImgDetMain',
-  phone: '13800138000',
-  createTime: '2023-01-01',
-  lastLoginTime: '2023-06-15'
+const userInfo = reactive<User>({
+  ...defaultUser
 });
+
 
 // 头像上传相关
 const avatarUrl = ref('');
