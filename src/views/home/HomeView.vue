@@ -561,7 +561,7 @@ const selectFavorite = (index: number) => {
           <div style="margin-top:1vh"><img src="https://password-xl.cn/assets/empty-Dnhuoe9-.svg" alt="none.svg"></div>
           <div><h2>当前暂无密码存储</h2></div>
           <div>
-            <AButton type="primary" size="large" style="border-radius: 15px">添加我的第一个密码</AButton>
+            <a-button type="primary" size="large" style="border-radius: 15px" @click="addPassword" >添加我的第一个密码</a-button>
           </div>
         </div>
       </a-card>
