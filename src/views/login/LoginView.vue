@@ -3,89 +3,113 @@ import {reactive, ref} from "vue";
 import type {LoginOptions} from "../../models/models.ts";
 import {useRouter} from "vue-router";
 import {useBackGroundImageStore} from "../../store/modules/backgroundImageStore.ts";
-import {Message} from '@arco-design/web-vue';
 import {initialize} from "../../hooks/init/initialize.ts";
+import {useStorageClientStore} from "../../store/modules/storageClientStore.ts";
+import LoginForm from "../../components/LoginForm.vue";
 
+const storageClientStore = useStorageClientStore();
 const router = useRouter();
 const optionLogSize = ref<string>("80px");
 const optionLogHeight = ref<string>('80px');
-
+const LoginFormShowState = ref<boolean>(false);
+const toggleLoginFormShowState = () => {
+  LoginFormShowState.value = !LoginFormShowState.value;
+}
 const LoginOptionList = reactive<LoginOptions[]>(
     [
       {
         name: "阿里云OSS", id: 1, logo: "/images/阿里云logo.jpg", theme: "#FF9A2E", func: () => {
-          Message.warning("使用阿里云OSS的登录方式暂未实现! 请等待!");
+          storageClientStore.setLoginPlatform('aliyun-oss');
+          toggleLoginFormShowState();
         }
       },
       {
         name: "华为云存储", id: 2, logo: "/images/华为云logo.png", theme: "#CB272D", func: () => {
-          Message.warning("使用华为云存储的登录方式暂未实现! 请等待!");
+          storageClientStore.setLoginPlatform('huawei-cloud');
+          toggleLoginFormShowState();
         }
       },
       {
         name: "腾讯云cos", id: 3, logo: "/images/cos-logo.png", theme: "#165DFF", func: () => {
-          Message.warning("使用腾讯云COS的登录方式暂未实现! 请等待!");
+          storageClientStore.setLoginPlatform('tencent-cos');
+          toggleLoginFormShowState();
         }
       },
       {
         name: "百度云存储", id: 4, logo: "/images/baiducloud-color.png", theme: "#c9cdd4", func: () => {
-          Message.warning("使用百度云存储的登录方式暂未实现! 请等待!");
+          storageClientStore.setLoginPlatform('baidu-cloud');
+          toggleLoginFormShowState();
         }
       },
       {
         name: "七牛云存储", id: 5, logo: "/images/七牛云logo.png", theme: "#114BA3", func: () => {
-          Message.warning("使用七牛云kodo的登录方式暂未实现! 请等待!");
+          storageClientStore.setLoginPlatform('qiniu-kodo');
+          toggleLoginFormShowState();
         }
       },
       {
         name: "Linux云服务器", id: 6, logo: "/images/linux-logo.png", theme: "#FBACA3", func: () => {
-          Message.warning("使用Linux云服务器的登录方式暂未实现! 请等待!");
+
+          storageClientStore.setLoginPlatform('linux-server');
+          toggleLoginFormShowState();
         }
       },
       {
         name: "SpringBootAPI", id: 7, logo: "/images/icons8-春天的标志-240.png", theme: "green", func: () => {
-          Message.warning("使用SpringBootAPI的登录方式暂未实现! 请等待!");
+
+          storageClientStore.setLoginPlatform('springboot-api');
+          toggleLoginFormShowState();
         }
       },
       {
         name: "浏览器本地缓存", id: 8, logo: "/images/google-color.png", theme: "#F979B7", func: () => {
           // 跳转至首页;
-          goHome();
+          storageClientStore.setLoginPlatform('localCache');
+          toggleLoginFormShowState();
+          //goHome();
         }
       },
       {
         name: "Supabase", id: 9, logo: "/images/Supabase.png", theme: "#23C343", func: () => {
           // 跳转至首页;
-          Message.warning("使用Supabase的登录方式暂未实现! 请等待!");
+
+          storageClientStore.setLoginPlatform('supabase');
+          toggleLoginFormShowState();
         }
       },
       {
         name: "minio", id: 10, logo: "/images/minio-1.svg", theme: "#FBACA3", func: () => {
           // 跳转至首页;
-          Message.warning("使用Minio的登录方式暂未实现! 请等待!");
+
+          storageClientStore.setLoginPlatform('minio');
+          toggleLoginFormShowState();
         }
       },
       {
         name: "ETCD", id: 11, logo: "/images/ETCD.png", theme: "#E8F7FF", func: () => {
           // 跳转至首页;
-          Message.warning("使用ETCD的登录方式暂未实现! 请等待!");
+
+          storageClientStore.setLoginPlatform('etcd');
+          toggleLoginFormShowState();
         }
       },
       {
         name: "Redis", id: 12, logo: "/images/Redis-Labs.png", theme: "#F76560", func: () => {
           // 跳转至首页;
-          Message.warning("使用Redis的登录方式暂未实现! 请等待!");
+
+          storageClientStore.setLoginPlatform('redis');
+          toggleLoginFormShowState();
         }
       },
     ]
 )
-const goHome = () => {
-  initialize('localCache');
-  console.log("跳转首页");
-  router.push("/home");
-  // 使用pinia保存选择的存储Type;
-}
+
+
 const backGroundImageStore = useBackGroundImageStore();
+const back = () => {
+  toggleLoginFormShowState();
+  storageClientStore.setLoginPlatform(null);
+}
 </script>
 
 <template>
@@ -93,7 +117,7 @@ const backGroundImageStore = useBackGroundImageStore();
     <div class="login-container">
       <div class="left-container"
            :style="{backgroundImage:  'url(' + backGroundImageStore.getLoginBackGroundImageURL + ')' }"></div>
-      <div class="right-container">
+      <div v-if="!LoginFormShowState" class="right-container  ">
         <div class="title">欢迎使用 password-QY</div>
         <div class="please">请选择您的登录方式</div>
         <a-divider/>
@@ -108,6 +132,10 @@ const backGroundImageStore = useBackGroundImageStore();
           </div>
         </div>
       </div>
+      <div v-else class="right-container">
+        <LoginForm @back="back"/>
+      </div>
+      <!--      进行数据初始化操作;-->
     </div>
   </div>
 </template>
@@ -127,6 +155,7 @@ const backGroundImageStore = useBackGroundImageStore();
     background-color: rgba(255, 255, 255, 0.9);
     display: flex;
     flex-direction: row;
+
     .left-container {
       width: 50%;
       /*background-image: url("/images/bg-left.png"); 已使用Pinia 结合CSS实现动态背景图*/
@@ -158,7 +187,8 @@ const backGroundImageStore = useBackGroundImageStore();
           background-color: rgba(136, 136, 136, 0.15);
           margin-top: 1vh;
           margin-left: 1.5vw;
-          .option-name{
+
+          .option-name {
             font-weight: bold;
             font-size: 0.9rem;
 

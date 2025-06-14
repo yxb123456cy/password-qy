@@ -3,11 +3,15 @@ import {ref, reactive} from 'vue';
 import {Message} from "@arco-design/web-vue";
 import {useRouter} from "vue-router";
 import type User from "../../models/user/user.ts";
-import defaultStorageUtil from "../../utils/modules/LocalStorageUtil.ts";
 
+import {useStorageClientStore} from "../../store/modules/storageClientStore.ts";
+import {genStorageUtil} from "../../utils";
+
+
+const storageClientStore = useStorageClientStore();
 const router = useRouter();
 
-const defaultUser: User = defaultStorageUtil.get('user')!;
+const defaultUser: User = genStorageUtil(storageClientStore.getPrefix).get('user')!;
 // 用户信息数据
 const userInfo = reactive<User>({
   ...defaultUser

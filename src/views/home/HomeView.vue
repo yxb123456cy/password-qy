@@ -5,12 +5,14 @@ import type {favoriteItemType, passwordItemType, tagType} from "../../models/mod
 
 import {Message, Modal} from '@arco-design/web-vue';
 import PasswordForm from '../../components/PasswordForm.vue';
-import defaultStorageUtil from "../../utils/modules/LocalStorageUtil.ts";
+import {genStorageUtil} from "../../utils";
+import {useStorageClientStore} from "../../store/modules/storageClientStore.ts";
 
+const storageClientStore = useStorageClientStore();
 const router = useRouter();
-let s = defaultStorageUtil.get<passwordItemType[]>('passwordList')!;
-let u = defaultStorageUtil.get<favoriteItemType[]>('favoriteList')!;
-let v = defaultStorageUtil.get<tagType[]>('tagList')!;
+let s = genStorageUtil(storageClientStore.getPrefix).get<passwordItemType[]>('passwordList')!;
+let u = genStorageUtil(storageClientStore.getPrefix).get<favoriteItemType[]>('favoriteList')!;
+let v = genStorageUtil(storageClientStore.getPrefix).get<tagType[]>('tagList')!;
 // 模拟密码数据
 const passwordList = ref<passwordItemType[]>([...s]);
 // 收藏列表
@@ -57,7 +59,7 @@ const togglePasswordStar = (item: passwordItemType, toStar: boolean) => {
       Message.success('已从收藏中移除');
     }
   }
-  defaultStorageUtil.set<favoriteItemType[]>('favoriteList', favoriteList.value);
+  genStorageUtil(storageClientStore.getPrefix).set<favoriteItemType[]>('favoriteList', favoriteList.value);
   return true;
 };
 
@@ -159,8 +161,8 @@ const handleFormSubmit = (formData: passwordItemType) => {
     }
     // 更新标签列表
     updateTagList();
-    defaultStorageUtil.set<passwordItemType[]>("passwordList", passwordList.value);
-    defaultStorageUtil.set<favoriteItemType[]>('favoriteList', favoriteList.value);
+    genStorageUtil(storageClientStore.getPrefix).set<passwordItemType[]>("passwordList", passwordList.value);
+    genStorageUtil(storageClientStore.getPrefix).set<favoriteItemType[]>('favoriteList', favoriteList.value);
     Message.success('添加密码成功');
   }
   drawerVisible.value = false;
@@ -199,8 +201,8 @@ const deletePassword = (item: passwordItemType) => {
         }
       }
 
-      defaultStorageUtil.set<passwordItemType[]>("passwordList", passwordList.value);
-      defaultStorageUtil.set<favoriteItemType[]>('favoriteList', favoriteList.value);
+      genStorageUtil(storageClientStore.getPrefix).set<passwordItemType[]>("passwordList", passwordList.value);
+      genStorageUtil(storageClientStore.getPrefix).set<favoriteItemType[]>('favoriteList', favoriteList.value);
       // 更新标签列表
       updateTagList();
       currentSelectedFavorite.value = null;
@@ -226,7 +228,7 @@ const updateTagList = () => {
 
   // 转换为标签列表格式
   tagList.value = Array.from(tagMap.entries()).map(([name, count]) => ({name, count}));
-  defaultStorageUtil.set<tagType[]>('tagList', tagList.value);
+  genStorageUtil(storageClientStore.getPrefix).set<tagType[]>('tagList', tagList.value);
 };
 
 // 搜索功能-搜索关键字;
@@ -440,8 +442,6 @@ const cancelTagAndFavoriteFilter = () => {
                 </a-doption>
               </template>
             </a-dropdown>
-
-
           </div>
         </template>
 

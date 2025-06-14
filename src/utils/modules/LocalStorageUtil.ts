@@ -85,6 +85,10 @@ export class LocalStorageUtil {
     }
 }
 
+export const genStorageUtil = (prefix: string): LocalStorageUtil => {
+    return new LocalStorageUtil(prefix+"_");
+}
+
 const defaultStorageUtil = new LocalStorageUtil("password_qy_");
 
 export default defaultStorageUtil;
