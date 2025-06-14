@@ -222,9 +222,10 @@ const deletePassword = (item: passwordItemType) => {
     content: `确定要删除「${item.title}」吗？此操作不可恢复。`,
     okText: '确认删除',
     cancelText: '取消',
+    // 取消删除密码逻辑;
     onCancel: () => {
-
     },
+    //确定删除密码逻辑;
     onOk: () => {
       // 从密码列表中删除
       const index = passwordList.value.findIndex(p => p.id === item.id);
@@ -242,7 +243,8 @@ const deletePassword = (item: passwordItemType) => {
 
       // 更新标签列表
       updateTagList();
-
+      currentSelectedFavorite.value = null;
+      currentSelectedTag.value = null;
       Message.success('密码已删除');
     }
   });
@@ -574,7 +576,7 @@ const selectFavorite = (index: number) => {
         @cancel="closeDrawer"
         :footer="false"
     >
-       <!--使用v-if 每个表单都是全新表单;-->
+      <!--使用v-if 每个表单都是全新表单;-->
       <PasswordForm
           v-if="drawerVisible"
           :is-edit="isEditMode"
