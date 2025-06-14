@@ -3,15 +3,21 @@ import { ref, reactive, defineEmits, defineProps, watch } from 'vue';
 import type { passwordItemType } from '../models/models';
 import { Message } from '@arco-design/web-vue';
 
+/**
+ * 定义事件名称;
+ */
 const emit = defineEmits(['submit', 'cancel']);
 
 const props = defineProps({
+  //是修改还是新建 默认新建;
   isEdit: {
     type: Boolean,
     default: false
   },
+  // 父组件需要传递过来的表单数据;
   passwordData: {
     type: Object as () => passwordItemType | null,
+    // 默认null
     default: null
   }
 });

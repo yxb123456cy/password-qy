@@ -9,7 +9,7 @@ import PasswordForm from '../../components/PasswordForm.vue';
 const router = useRouter();
 // 模拟密码数据
 const passwordList = ref<passwordItemType[]>([
-  /*{
+  {
     id: 1,
     title: '个人邮箱',
     remark: "个人邮箱密码",
@@ -48,7 +48,7 @@ const passwordList = ref<passwordItemType[]>([
     website: 'social.example.com',
     tags: ['社交', '娱乐'],
     star: false,
-  },*/
+  },
 ]);
 // 收藏列表
 const favoriteList = ref<favoriteItemType[]>([
@@ -220,6 +220,9 @@ const deletePassword = (item: passwordItemType) => {
     content: `确定要删除「${item.title}」吗？此操作不可恢复。`,
     okText: '确认删除',
     cancelText: '取消',
+    onCancel: () => {
+
+    },
     onOk: () => {
       // 从密码列表中删除
       const index = passwordList.value.findIndex(p => p.id === item.id);
@@ -550,10 +553,12 @@ const selectFavorite = (index: number) => {
             </div>
           </a-card>
         </div>
-        <div class="empty-list" v-else >
+        <div class="empty-list" v-else>
           <div style="margin-top:1vh"><img src="https://password-xl.cn/assets/empty-Dnhuoe9-.svg" alt="none.svg"></div>
           <div><h2>当前暂无密码存储</h2></div>
-          <div><AButton type="primary" size="large" style="border-radius: 15px">添加我的第一个密码</AButton></div>
+          <div>
+            <AButton type="primary" size="large" style="border-radius: 15px">添加我的第一个密码</AButton>
+          </div>
         </div>
       </a-card>
     </div>
@@ -563,7 +568,8 @@ const selectFavorite = (index: number) => {
         :visible="drawerVisible"
         :width="500"
         :title="isEditMode ? '编辑密码' : '添加密码'"
-        @cancel="closeDrawer"
+        :hide-cancel="true"
+        :footer="false"
     >
       <PasswordForm
           :is-edit="isEditMode"
