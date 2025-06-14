@@ -3,10 +3,13 @@ import {ref, computed} from 'vue';
 import {useRouter} from "vue-router";
 import type {favoriteItemType, passwordItemType, tagType} from "../../models/models.ts";
 
+import {Message, Modal} from '@arco-design/web-vue';
+import PasswordForm from '../../components/PasswordForm.vue';
+
 const router = useRouter();
 // 模拟密码数据
 const passwordList = ref<passwordItemType[]>([
-  {
+  /*{
     id: 1,
     title: '个人邮箱',
     remark: "个人邮箱密码",
@@ -45,7 +48,7 @@ const passwordList = ref<passwordItemType[]>([
     website: 'social.example.com',
     tags: ['社交', '娱乐'],
     star: false,
-  },
+  },*/
 ]);
 // 收藏列表
 const favoriteList = ref<favoriteItemType[]>([
@@ -64,8 +67,6 @@ const tagList = ref<tagType[]>([
 ]);
 const passwordListView = ref<string>("card");
 
-import {Message, Modal} from '@arco-design/web-vue';
-import PasswordForm from '../../components/PasswordForm.vue';
 
 // 切换密码收藏状态
 const togglePasswordStar = (item: passwordItemType, toStar: boolean) => {
@@ -172,7 +173,7 @@ const handleFormSubmit = (formData: passwordItemType) => {
     const index = passwordList.value.findIndex(item => item.id === formData.id);
     if (index !== -1) {
       passwordList.value[index] = formData;
-      
+
       // 如果是收藏项，也需要更新收藏列表
       if (formData.star) {
         const favIndex = favoriteList.value.findIndex(item => item.id === formData.id);
@@ -184,13 +185,13 @@ const handleFormSubmit = (formData: passwordItemType) => {
           };
         }
       }
-      
+
       Message.success('密码已更新');
     }
   } else {
     // 添加新密码
     passwordList.value.push(formData);
-    
+
     // 如果设置了收藏，添加到收藏列表
     if (formData.star) {
       favoriteList.value.push({
@@ -203,7 +204,7 @@ const handleFormSubmit = (formData: passwordItemType) => {
     updateTagList();
     Message.success('密码已添加');
   }
-  
+
   drawerVisible.value = false;
 };
 
@@ -225,7 +226,7 @@ const deletePassword = (item: passwordItemType) => {
       if (index !== -1) {
         passwordList.value.splice(index, 1);
       }
-      
+
       // 如果在收藏列表中，也需要删除
       if (item.star) {
         const favIndex = favoriteList.value.findIndex(f => f.id === item.id);
@@ -233,10 +234,10 @@ const deletePassword = (item: passwordItemType) => {
           favoriteList.value.splice(favIndex, 1);
         }
       }
-      
+
       // 更新标签列表
       updateTagList();
-      
+
       Message.success('密码已删除');
     }
   });
@@ -247,7 +248,7 @@ const updateTagList = () => {
   // 创建一个Map来存储标签及其计数
   const tagMap = new Map<string, number>();
   tagMap.set('全部', passwordList.value.length);
-  
+
   // 遍历所有密码项的标签
   passwordList.value.forEach(item => {
     item.tags.forEach(tag => {
@@ -255,9 +256,9 @@ const updateTagList = () => {
       tagMap.set(tag, count + 1);
     });
   });
-  
+
   // 转换为标签列表格式
-  tagList.value = Array.from(tagMap.entries()).map(([name, count]) => ({ name, count }));
+  tagList.value = Array.from(tagMap.entries()).map(([name, count]) => ({name, count}));
 };
 
 // 搜索功能-搜索关键字;
@@ -278,16 +279,17 @@ const filteredPasswordList = computed(() => {
       const selectedFavoriteId = favoriteList.value[currentSelectedFavorite.value].id;
       return passwordList.value.filter(item => item.id === selectedFavoriteId);
     }
+    // 当没有按标签筛选也没有按收藏筛选走的方式;
     return passwordList.value;
   }
   // 搜索关键词筛选 使用字符串的includes API;
   const keyword = searchKeyword.value.toLowerCase();
-  return passwordList.value.filter(item => 
-    item.title.toLowerCase().includes(keyword) ||
-    item.username.toLowerCase().includes(keyword) ||
-    item.website.toLowerCase().includes(keyword) ||
-    item.remark.toLowerCase().includes(keyword) ||
-    item.tags.some(tag => tag.toLowerCase().includes(keyword))
+  return passwordList.value.filter(item =>
+      item.title.toLowerCase().includes(keyword) ||
+      item.username.toLowerCase().includes(keyword) ||
+      item.website.toLowerCase().includes(keyword) ||
+      item.remark.toLowerCase().includes(keyword) ||
+      item.tags.some(tag => tag.toLowerCase().includes(keyword))
   );
 });
 
@@ -360,12 +362,12 @@ const selectFavorite = (index: number) => {
           <div class="right-panel-card-title" style="display: flex;gap:4vw;">
             <div class="password-card-title">密码管理</div>
             <div class="extra-search">
-              <a-input-search 
-                :style="{ width: '320px', display: 'inline-block' }" 
-                placeholder="搜索..." 
-                search-button
-                v-model="searchKeyword"
-                @search="handleSearch"
+              <a-input-search
+                  :style="{ width: '320px', display: 'inline-block' }"
+                  placeholder="搜索..."
+                  search-button
+                  v-model="searchKeyword"
+                  @search="handleSearch"
               />
             </div>
           </div>
@@ -437,7 +439,7 @@ const selectFavorite = (index: number) => {
                   <template #icon>
                     <icon-settings/>
                   </template>
-                  <template #default >系统设置</template>
+                  <template #default>系统设置</template>
                 </a-doption>
                 <a-doption @click="openDeleteList">
                   <template #icon>
@@ -459,7 +461,7 @@ const selectFavorite = (index: number) => {
         </template>
 
         <!-- 密码卡片列表 -->
-        <div class="password-list">
+        <div class="password-list" v-if="filteredPasswordList.length!=0">
           <a-card v-for="item in filteredPasswordList" :key="item.id" class="password-item">
             <template #title>
               <div class="password-item-title">
@@ -548,27 +550,41 @@ const selectFavorite = (index: number) => {
             </div>
           </a-card>
         </div>
+        <div class="empty-list" v-else >
+          <div style="margin-top:1vh"><img src="https://password-xl.cn/assets/empty-Dnhuoe9-.svg" alt="none.svg"></div>
+          <div><h2>当前暂无密码存储</h2></div>
+          <div><AButton type="primary" size="large" style="border-radius: 15px">添加我的第一个密码</AButton></div>
+        </div>
       </a-card>
     </div>
-    
+
     <!-- 添加/编辑密码抽屉 -->
     <a-drawer
-      :visible="drawerVisible"
-      :width="500"
-      :title="isEditMode ? '编辑密码' : '添加密码'"
-      @cancel="closeDrawer"
+        :visible="drawerVisible"
+        :width="500"
+        :title="isEditMode ? '编辑密码' : '添加密码'"
+        @cancel="closeDrawer"
     >
       <PasswordForm
-        :is-edit="isEditMode"
-        :password-data="currentEditPassword"
-        @submit="handleFormSubmit"
-        @cancel="closeDrawer"
+          :is-edit="isEditMode"
+          :password-data="currentEditPassword"
+          @submit="handleFormSubmit"
+          @cancel="closeDrawer"
       />
     </a-drawer>
   </div>
 </template>
 
 <style scoped lang="less">
+.empty-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1vh;
+
+}
+
 .favorite-selected {
   background-color: #7BE188;
 }
