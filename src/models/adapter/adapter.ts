@@ -1,8 +1,13 @@
 // 所有存储平台的连接测试适配器
 
+
 const test_connect_str: string = 'test_connect_str';
 // 1. 通用接口
 import {genStorageUtil} from "../../utils";
+import {useStorageClientStore} from "../../store/modules/storageClientStore.ts";
+import pinia from "../../store";
+
+const store = useStorageClientStore(pinia);
 
 export interface IStorageAdapter {
     testConnection(config: Record<string, any>): Promise<boolean>;
@@ -88,7 +93,14 @@ export class LocalCacheAdapter implements IStorageAdapter {
 export class SupabaseAdapter implements IStorageAdapter {
     async testConnection(config: { url: string; apiKey: string }) {
         console.log(config);
-        return true;
+        store.setSupaBaseClient(config.url, config.apiKey);
+        const supaBaseClient = store.getSupaBaseClient!;
+        const {data, error} = await supaBaseClient
+            .storage
+            .listBuckets();
+        console.log(data);
+        console.log(error);
+        return data != null && data.length > 0;
     }
 }
 

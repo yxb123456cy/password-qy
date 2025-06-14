@@ -252,7 +252,6 @@ const connectTest = async () => {
     console.log("form:", form.prefix);
     const adapter = StorageAdapterFactory.getAdapter(p);
     let res = await adapter.testConnection(form);
-
     console.log("连接测试结果:", res);
     //为ture; 打开登录限制;
     if (res) {
@@ -264,11 +263,10 @@ const connectTest = async () => {
       }, 500)
 
     } else {
+      Message.error("连接测试失败,请检查输入或平台相关配置!");
       disabled.value = true;
     }
   }
-
-
 }
 const platformLabels: Record<LoginPlatform, string> = {
   'aliyun-oss': '阿里云 OSS',

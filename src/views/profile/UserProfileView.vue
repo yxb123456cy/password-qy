@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref, reactive} from 'vue';
-import {Message} from "@arco-design/web-vue";
+import {FileItem, Message} from "@arco-design/web-vue";
 import {useRouter} from "vue-router";
 import type User from "../../models/user/user.ts";
 
@@ -22,16 +22,34 @@ const userInfo = reactive<User>({
 const avatarUrl = ref('');
 const uploadLoading = ref(false);
 
-const handleAvatarUpload = (file: File) => {
+const handleAvatarUpload = async (file: FileItem) => {
   uploadLoading.value = true;
-  // 模拟上传
-  setTimeout(() => {
-    // 这里应该是实际的上传逻辑和API调用
-    avatarUrl.value = URL.createObjectURL(file);
-    userInfo.avatar = avatarUrl.value;
-    uploadLoading.value = false;
+  console.log(file.fileItem.file,file.fileItem.name);
+  try {
+    const supabase = storageClientStore.getDefaultSupaBaseClient!;
+    const filePath = `public/avatar/${Date.now()}_${file.fileItem.name}`;
+    const {data, error} = await supabase.storage
+        .from('password-qy')
+        .upload(filePath, file.fileItem.file, {
+          cacheControl: '3600',
+          upsert: true // 可以覆盖旧头像
+        });
+    console.log(data);
+    console.log(error);
+    // 获取公开 URL
+    const {
+      data: {publicUrl}
+    } = supabase.storage.from('password-qy').getPublicUrl(filePath);
+    // 更新用户头像
+    userInfo.avatar = publicUrl;
+    genStorageUtil(storageClientStore.getPrefix).set<User>('user',userInfo);
     Message.success('头像上传成功');
-  }, 1500);
+  } catch (err: any) {
+    console.error(err);
+    Message.error('上传失败，请重试');
+  } finally {
+    uploadLoading.value = false;
+  }
   return false; // 阻止默认上传行为
 };
 
