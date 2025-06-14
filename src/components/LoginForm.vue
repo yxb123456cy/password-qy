@@ -3,7 +3,7 @@
     <a-form
         ref="formRef"
         :model="form"
-        :rules="rules"
+        :rules="rules[platform]"
         class="mt-4"
         layout="vertical"
         @submit.prevent="onSubmit"
@@ -240,26 +240,35 @@ const resetForm = () => {
  * 连接测试方法 使用适配器+工厂模式;
  */
 const connectTest = async () => {
-  ButtonLoadingState.value = true;
-  const p = storageClientStore.getLoginPlatform;
-  console.log(p);
-  console.log("form:", form.prefix);
-  const adapter = StorageAdapterFactory.getAdapter(p);
-  let res = await adapter.testConnection(form);
-
-  console.log("连接测试结果:", res);
-  //为ture; 打开登录限制;
-  if (res) {
-    storageClientStore.setPrefix(form.prefix as string);
-    setTimeout(() => {
-      disabled.value = false;
-      Message.success("连接测试成功!");
-      ButtonLoadingState.value = false;
-    }, 500)
-
+  const validate = await formRef.value?.validate();
+  console.log("validate", validate);
+  if (validate != undefined) {
+    //校验未通过;
+    Message.error("校验未通过,请检查输入!");
   } else {
-    disabled.value = true;
+    ButtonLoadingState.value = true;
+    const p = storageClientStore.getLoginPlatform;
+    console.log(p);
+    console.log("form:", form.prefix);
+    const adapter = StorageAdapterFactory.getAdapter(p);
+    let res = await adapter.testConnection(form);
+
+    console.log("连接测试结果:", res);
+    //为ture; 打开登录限制;
+    if (res) {
+      storageClientStore.setPrefix(form.prefix as string);
+      setTimeout(() => {
+        disabled.value = false;
+        Message.success("连接测试成功!");
+        ButtonLoadingState.value = false;
+      }, 500)
+
+    } else {
+      disabled.value = true;
+    }
   }
+
+
 }
 const platformLabels: Record<LoginPlatform, string> = {
   'aliyun-oss': '阿里云 OSS',
@@ -275,34 +284,104 @@ const platformLabels: Record<LoginPlatform, string> = {
   'etcd': 'ETCD',
   'redis': 'Redis',
 };
-const rules = {};
+const rules: Record<string, Record<string, any[]>> = {
+  'aliyun-oss': {
+    accessKeyId: [{required: true, message: '请输入 AccessKeyId'}],
+    accessKeySecret: [{required: true, message: '请输入 AccessKeySecret'}],
+    bucket: [{required: true, message: '请输入 Bucket 名称'}],
+    region: [{required: true, message: '请输入 Region 区域'}],
+  },
+  'huawei-cloud': {
+    accessKey: [{required: true, message: '请输入 AccessKey'}],
+    secretKey: [{required: true, message: '请输入 SecretKey'}],
+    bucket: [{required: true, message: '请输入 Bucket 名称'}],
+    region: [{required: true, message: '请输入 Region 区域'}],
+  },
+  'tencent-cos': {
+    secretId: [{required: true, message: '请输入 SecretId'}],
+    secretKey: [{required: true, message: '请输入 SecretKey'}],
+    bucket: [{required: true, message: '请输入 Bucket 名称'}],
+    region: [{required: true, message: '请输入 Region 区域'}],
+  },
+  'baidu-cloud': {
+    ak: [{required: true, message: '请输入 AccessKey (AK)'}],
+    sk: [{required: true, message: '请输入 SecretKey (SK)'}],
+    bucket: [{required: true, message: '请输入 Bucket 名称'}],
+    endpoint: [{required: true, message: '请输入 Endpoint 接口地址'}],
+  },
+  'qiniu-kodo': {
+    ak: [{required: true, message: '请输入 AK'}],
+    sk: [{required: true, message: '请输入 SK'}],
+    bucket: [{required: true, message: '请输入 Bucket 名称'}],
+    region: [{required: true, message: '请输入 Region 区域'}],
+  },
+  'linux-server': {
+    ip: [{required: true, message: '请输入 IP 地址'}],
+    username: [{required: true, message: '请输入用户名'}],
+    password: [{required: true, message: '请输入密码'}],
+  },
+  'springboot-api': {
+    username: [{required: true, message: '请输入用户名'}],
+    password: [{required: true, message: '请输入密码'}],
+  },
+  'localCache': {
+    prefix: [{required: true, message: '请输入命名空间前缀'}],
+  },
+  'supabase': {
+    url: [{required: true, message: '请输入 Supabase URL'}],
+    apiKey: [{required: true, message: '请输入 API Key'}],
+  },
+  'minio': {
+    endpoint: [{required: true, message: '请输入 Endpoint'}],
+    accessKey: [{required: true, message: '请输入 Access Key'}],
+    secretKey: [{required: true, message: '请输入 Secret Key'}],
+  },
+  'etcd': {
+    endpoint: [{required: true, message: '请输入 Endpoint'}],
+    // username/password 可选，不加 required
+  },
+  'redis': {
+    host: [{required: true, message: '请输入 Redis 主机地址'}],
+    port: [
+      {required: true, type: 'number', message: '请输入端口号'},
+      {type: 'number', min: 1, max: 65535, message: '端口必须在 1~65535 之间'}
+    ],
+    // password 可选
+  }
+};
 const goHome = () => {
   // 使用pinia保存选择的存储Type;
   console.log("跳转首页");
   router.push("/home");
 }
 const onSubmit = async () => {
-  await formRef.value?.validate();
-  console.log('提交的数据：', platform, form);
-  LoadingState2.value = true; //开启加载;
-  SubmitButtonLoadingState.value = true;
-  const res = initialize(storageClientStore.getLoginPlatform, form.prefix as string);
-  if (res != undefined && res) {
-    //代表初始化数据成功
-    setTimeout(() => {
+  const validate = await formRef.value?.validate();
+  if (validate != undefined) {
+    //校验未通过;
+    Message.error("校验未通过,请检查输入!");
+  }else {
+    console.log('提交的数据：', platform, form);
+    LoadingState2.value = true; //开启加载;
+    SubmitButtonLoadingState.value = true;
+    const res = initialize(storageClientStore.getLoginPlatform, form.prefix as string);
+    if (res != undefined && res) {
+      //代表初始化数据成功
+      setTimeout(() => {
+        LoadingState2.value = false; //开启加载;
+        SubmitButtonLoadingState.value = false;
+        Message.success(`使用 ${platformLabels[platform!]} 方式登录成功`);
+        goHome();
+      }, 1000);
+      //调用goHome方法;
+
+    } else {
+      Message.error("初始化数据失败");
+      //继续关闭;
       LoadingState2.value = false; //开启加载;
       SubmitButtonLoadingState.value = false;
-      Message.success(`使用 ${platformLabels[platform!]} 方式登录成功`);
-      goHome();
-    }, 1000);
-    //调用goHome方法;
-
-  } else {
-    Message.error("初始化数据失败");
-    //继续关闭;
-    LoadingState2.value = false; //开启加载;
-    SubmitButtonLoadingState.value = false;
+    }
   }
+
 
 
 };
