@@ -107,7 +107,7 @@ const formRef = ref<FormInstance>();
 // 提交表单
 const handleSubmit = async () => {
   try {
-    if (!formRef.value){
+    if (!formRef.value) {
       Message.error('表单未挂载!');
       return;
     }
@@ -142,6 +142,7 @@ const handleSubmit = async () => {
   }
 };
 
+const inputPassword = ref();
 // 取消操作
 const handleCancel = () => {
   emit('cancel');
@@ -156,7 +157,7 @@ const generateRandomPassword = () => {
     password += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   formData.password = password;
-  passwordVisible.value = true; // 显示生成的密码
+  passwordVisible.value = false; // 显示生成的密码
 };
 </script>
 
@@ -174,10 +175,11 @@ const generateRandomPassword = () => {
 
       <a-form-item field="password" label="密码">
         <a-input-password
+            ref="inputPassword"
             v-model="formData.password"
             placeholder="请输入密码"
             :visibility="passwordVisible"
-            @visibility-change="(value: boolean) => passwordVisible = value"
+            @visibilityChange="(value: boolean) => passwordVisible = value"
         >
           <template #suffix>
             <a-button type="text" size="mini" @click="generateRandomPassword">
