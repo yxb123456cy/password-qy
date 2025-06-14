@@ -169,6 +169,7 @@ const editPassword = (item: passwordItemType) => {
 // 处理表单提交
 const handleFormSubmit = (formData: passwordItemType) => {
   if (isEditMode.value) {
+    console.log("选择更新密码 value:", formData);
     // 更新现有密码
     const index = passwordList.value.findIndex(item => item.id === formData.id);
     if (index !== -1) {
@@ -185,13 +186,13 @@ const handleFormSubmit = (formData: passwordItemType) => {
           };
         }
       }
-
       Message.success('密码已更新');
+
     }
   } else {
+    console.log("新增密码 value:", formData);
     // 添加新密码
     passwordList.value.push(formData);
-
     // 如果设置了收藏，添加到收藏列表
     if (formData.star) {
       favoriteList.value.push({
@@ -202,10 +203,11 @@ const handleFormSubmit = (formData: passwordItemType) => {
     }
     // 更新标签列表
     updateTagList();
-    Message.success('密码已添加');
+    Message.success('添加密码成功');
   }
-
   drawerVisible.value = false;
+  // current置空;
+  currentEditPassword.value = null;
 };
 
 // 关闭抽屉
@@ -569,9 +571,12 @@ const selectFavorite = (index: number) => {
         :width="500"
         :title="isEditMode ? '编辑密码' : '添加密码'"
         :hide-cancel="true"
+        @cancel="closeDrawer"
         :footer="false"
     >
+       <!--使用v-if 每个表单都是全新表单;-->
       <PasswordForm
+          v-if="drawerVisible"
           :is-edit="isEditMode"
           :password-data="currentEditPassword"
           @submit="handleFormSubmit"
