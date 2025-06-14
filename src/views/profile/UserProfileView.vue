@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import {ref, reactive} from 'vue';
 import {Message} from "@arco-design/web-vue";
+import {useRouter} from "vue-router";
 
+const router = useRouter();
 // 用户信息数据
 const userInfo = reactive({
-  username: '张三',
+  username: '轻叶',
   email: 'zhangsan@example.com',
-  avatar: '',
+  avatar: 'https://th.bing.com/th/id/OIP.NHJWTOPxa3ZQmW99bQp2EQHaHa?rs=1&pid=ImgDetMain',
   phone: '13800138000',
   createTime: '2023-01-01',
   lastLoginTime: '2023-06-15'
@@ -36,7 +38,9 @@ const editForm = reactive({
   email: userInfo.email,
   phone: userInfo.phone
 });
-
+const goHome = () => {
+  router.push("/home");
+}
 const showEditModal = () => {
   // 重置表单数据
   editForm.username = userInfo.username;
@@ -51,7 +55,7 @@ const handleEditSubmit = () => {
   userInfo.username = editForm.username;
   userInfo.email = editForm.email;
   userInfo.phone = editForm.phone;
-  
+
   editVisible.value = false;
   Message.success('个人信息更新成功');
 };
@@ -77,7 +81,7 @@ const handlePasswordSubmit = () => {
     Message.error('新密码与确认密码不一致');
     return;
   }
-  
+
   // 这里应该是实际的API调用
   // 模拟修改成功
   passwordVisible.value = false;
@@ -91,81 +95,90 @@ const handlePasswordSubmit = () => {
       <template #title>
         <div class="card-title">个人中心</div>
       </template>
-      
+
       <!-- 用户基本信息 -->
       <div class="user-info-section">
         <div class="avatar-section">
           <a-upload
-            action=""
-            :show-file-list="false"
-            :custom-request="handleAvatarUpload"
-            accept="image/*"
+              action=""
+              :show-file-list="false"
+              :custom-request="handleAvatarUpload"
+              accept="image/*"
           >
-            <a-avatar 
-              :image-url="userInfo.avatar || 'https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp'"
-              :size="100"
-              :trigger-type="['button', 'mask']"
-            >
-              <template #trigger-icon>
-                <icon-camera />
-              </template>
-            </a-avatar>
+
           </a-upload>
+          <a-avatar :size="200" style="margin-top: 2vh">
+            <img
+                alt="avatar"
+                :src="userInfo.avatar"
+            />
+          </a-avatar>
           <div class="username">{{ userInfo.username }}</div>
         </div>
-        
+
         <div class="info-details">
           <a-descriptions :data="[{ label: '用户名', value: userInfo.username },
                                 { label: '邮箱', value: userInfo.email },
                                 { label: '手机号', value: userInfo.phone },
                                 { label: '注册时间', value: userInfo.createTime },
-                                { label: '上次登录', value: userInfo.lastLoginTime }]" 
-                         layout="inline-vertical" 
-                         :column="{ xs: 1, sm: 2, md: 2, lg: 3 }" />
+                                { label: '上次登录', value: userInfo.lastLoginTime }]"
+                          layout="inline-vertical"
+                          :column="{ xs: 1, sm: 2, md: 2, lg: 3 }"/>
         </div>
       </div>
-      
+
       <!-- 操作按钮 -->
       <div class="action-buttons">
+
         <a-space>
+          <a-button type="primary" status="success" @click="goHome">
+            <template #icon>
+              <icon-backward/>
+            </template>
+            返回首页
+          </a-button>
           <a-button type="primary" @click="showEditModal">
-            <template #icon><icon-edit /></template>
+            <template #icon>
+              <icon-edit/>
+            </template>
             编辑资料
           </a-button>
           <a-button status="warning" @click="showPasswordModal">
-            <template #icon><icon-lock /></template>
+            <template #icon>
+              <icon-lock/>
+            </template>
             修改密码
           </a-button>
         </a-space>
       </div>
     </a-card>
-    
+
     <!-- 编辑个人信息弹窗 -->
     <a-modal v-model:visible="editVisible" title="编辑个人信息" @ok="handleEditSubmit">
       <a-form :model="editForm">
         <a-form-item field="username" label="用户名">
-          <a-input v-model="editForm.username" placeholder="请输入用户名" />
+          <a-input v-model="editForm.username" placeholder="请输入用户名"/>
         </a-form-item>
         <a-form-item field="email" label="邮箱">
-          <a-input v-model="editForm.email" placeholder="请输入邮箱" />
+          <a-input v-model="editForm.email" placeholder="请输入邮箱"/>
         </a-form-item>
         <a-form-item field="phone" label="手机号">
-          <a-input v-model="editForm.phone" placeholder="请输入手机号" />
+          <a-input v-model="editForm.phone" placeholder="请输入手机号"/>
         </a-form-item>
       </a-form>
     </a-modal>
-    
+
     <!-- 修改密码弹窗 -->
     <a-modal v-model:visible="passwordVisible" title="修改密码" @ok="handlePasswordSubmit">
       <a-form :model="passwordForm">
         <a-form-item field="oldPassword" label="当前密码">
-          <a-input-password v-model="passwordForm.oldPassword" placeholder="请输入当前密码" />
+          <a-input-password v-model="passwordForm.oldPassword" placeholder="请输入当前密码"/>
         </a-form-item>
         <a-form-item field="newPassword" label="新密码">
-          <a-input-password v-model="passwordForm.newPassword" placeholder="请输入新密码" />
+          <a-input-password v-model="passwordForm.newPassword" placeholder="请输入新密码"/>
         </a-form-item>
         <a-form-item field="confirmPassword" label="确认密码">
-          <a-input-password v-model="passwordForm.confirmPassword" placeholder="请再次输入新密码" />
+          <a-input-password v-model="passwordForm.confirmPassword" placeholder="请再次输入新密码"/>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -196,7 +209,7 @@ const handlePasswordSubmit = () => {
   flex-direction: column;
   align-items: center;
   margin-bottom: 24px;
-  
+
   @media (min-width: 768px) {
     flex-direction: row;
     align-items: flex-start;
@@ -208,7 +221,7 @@ const handlePasswordSubmit = () => {
   flex-direction: column;
   align-items: center;
   margin-bottom: 20px;
-  
+
   @media (min-width: 768px) {
     margin-right: 40px;
     margin-bottom: 0;
@@ -229,7 +242,7 @@ const handlePasswordSubmit = () => {
   display: flex;
   justify-content: center;
   margin-top: 24px;
-  
+
   @media (min-width: 768px) {
     justify-content: flex-end;
   }

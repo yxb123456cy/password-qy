@@ -4,6 +4,7 @@ export interface LoginOptions {
     // logo URL
     logo: string,
     theme: string,
+    func: Function,
 }
 
 export interface tagType {

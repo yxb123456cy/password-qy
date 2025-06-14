@@ -3,6 +3,7 @@ import {reactive, ref} from "vue";
 import type {LoginOptions} from "../../models/models.ts";
 import {useRouter} from "vue-router";
 import {useBackGroundImageStore} from "../../store/modules/backgroundImageStore.ts";
+import {Message} from '@arco-design/web-vue';
 
 const router = useRouter();
 const optionLogSize = ref<string>("50px");
@@ -10,14 +11,47 @@ const optionLogHeight = ref<string>('40px');
 
 const LoginOptionList = reactive<LoginOptions[]>(
     [
-      {name: "阿里云OSS", id: 1, logo: "/images/阿里云logo.jpg", theme: "#FF9A2E",},
-      {name: "华为云存储", id: 2, logo: "/images/华为云logo.png", theme: "#CB272D",},
-      {name: "腾讯云cos", id: 3, logo: "/images/cos-logo.png", theme: "#165DFF",},
-      {name: "百度云存储", id: 4, logo: "/images/baiducloud-color.png", theme: "#c9cdd4",},
-      {name: "七牛云存储", id: 5, logo: "/images/七牛云logo.png", theme: "#114BA3",},
-      {name: "Linux云服务器", id: 6, logo: "/images/linux-logo.png", theme: "#FBACA3",},
-      {name: "电脑本地文件存储", id: 8, logo: "/images/windows-logo.png", theme: "#C396ED",},
-      {name: "浏览器本地缓存", id: 8, logo: "/images/google-color.png", theme: "#F979B7",},
+      {
+        name: "阿里云OSS", id: 1, logo: "/images/阿里云logo.jpg", theme: "#FF9A2E", func: () => {
+          Message.warning("使用阿里云OSS的登录方式暂未实现! 请等待!");
+        }
+      },
+      {
+        name: "华为云存储", id: 2, logo: "/images/华为云logo.png", theme: "#CB272D", func: () => {
+          Message.warning("使用华为云存储的登录方式暂未实现! 请等待!");
+        }
+      },
+      {
+        name: "腾讯云cos", id: 3, logo: "/images/cos-logo.png", theme: "#165DFF", func: () => {
+          Message.warning("使用腾讯云COS的登录方式暂未实现! 请等待!");
+        }
+      },
+      {
+        name: "百度云存储", id: 4, logo: "/images/baiducloud-color.png", theme: "#c9cdd4", func: () => {
+          Message.warning("使用百度云存储的登录方式暂未实现! 请等待!");
+        }
+      },
+      {
+        name: "七牛云存储", id: 5, logo: "/images/七牛云logo.png", theme: "#114BA3", func: () => {
+          Message.warning("使用七牛云kodo的登录方式暂未实现! 请等待!");
+        }
+      },
+      {
+        name: "Linux云服务器", id: 6, logo: "/images/linux-logo.png", theme: "#FBACA3", func: () => {
+          Message.warning("使用Linux云服务器的登录方式暂未实现! 请等待!");
+        }
+      },
+      {
+        name: "SpringBootAPI", id: 8, logo: "/images/icons8-春天的标志-240.png", theme: "green", func: () => {
+          Message.warning("使用SpringBootAPI的登录方式暂未实现! 请等待!");
+        }
+      },
+      {
+        name: "浏览器本地缓存", id: 8, logo: "/images/google-color.png", theme: "#F979B7", func: () => {
+          // 跳转至首页;
+          goHome();
+        }
+      },
     ]
 )
 const goHome = () => {
@@ -25,14 +59,6 @@ const goHome = () => {
   router.push("/home");
   // 使用pinia保存选择的存储Type;
 }
-/*- 阿里云OSS
-- 华为云存储
-- 腾讯云cos
-- 百度云存储
-- 浏览器本地缓存
-- Linux云服务器
-- 电脑本地文件存储
-- 七牛云存储*/
 const backGroundImageStore = useBackGroundImageStore();
 </script>
 
@@ -46,8 +72,7 @@ const backGroundImageStore = useBackGroundImageStore();
         <div class="please">请选择您的登录方式</div>
         <a-divider/>
         <div class="login-options-view">
-          <div class="login-option-item" v-for="(item,index) in LoginOptionList" :key="index" @click="goHome()"
-               :style="{backgroundColor: item.theme}"
+          <div class="login-option-item" v-for="(item,index) in LoginOptionList" :key="index" @click="item.func()" :style="{backgroundColor: item.theme}"
           >
             <div class="option-logo">
               <img :src="item.logo" :alt="item.logo" :width="optionLogSize" :height="optionLogHeight">
