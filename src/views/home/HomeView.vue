@@ -7,8 +7,10 @@ import {Message, Modal} from '@arco-design/web-vue';
 import PasswordForm from '../../components/PasswordForm.vue';
 import {genStorageUtil} from "../../utils";
 import {useStorageClientStore} from "../../store/modules/storageClientStore.ts";
+import {useLockStore} from "../../store/modules/lockStore.ts";
 
 const storageClientStore = useStorageClientStore();
+const lockStore = useLockStore();
 const router = useRouter();
 let s = genStorageUtil(storageClientStore.getPrefix).get<passwordItemType[]>('passwordList')!;
 let u = genStorageUtil(storageClientStore.getPrefix).get<favoriteItemType[]>('favoriteList')!;
@@ -96,14 +98,6 @@ const logout = () => {
   router.push("/");
 }
 
-
-// 是否锁定密码卡片
-const isLocked = ref(false);
-
-// 切换锁定状态
-const toggleLock = () => {
-  isLocked.value = !isLocked.value;
-};
 
 // 抽屉可见性控制
 const drawerVisible = ref(false);
@@ -382,7 +376,7 @@ const cancelTagAndFavoriteFilter = () => {
             </a-tooltip>
 
             <a-tooltip content="添加新的密码">
-              <a-button type="primary" @click="addPassword" :disabled="isLocked">
+              <a-button type="primary" @click="addPassword" :disabled="lockStore.getLockState">
                 <template #icon>
                   <icon-plus/>
                 </template>
@@ -390,13 +384,13 @@ const cancelTagAndFavoriteFilter = () => {
               </a-button>
             </a-tooltip>
 
-            <a-tooltip :content="isLocked ? '解除锁定' : '锁定'">
-              <a-button @click="toggleLock">
+            <a-tooltip :content="lockStore.getLockState ? '解除锁定' : '锁定'">
+              <a-button @click="lockStore.toggleLockState">
                 <template #icon>
-                  <icon-unlock v-if="isLocked"/>
+                  <icon-unlock v-if="lockStore.getLockState"/>
                   <icon-lock v-else/>
                 </template>
-                {{ isLocked ? '解锁' : '锁定' }}
+                {{ lockStore.getLockState ? '解锁' : '锁定' }}
               </a-button>
             </a-tooltip>
 
@@ -445,108 +439,118 @@ const cancelTagAndFavoriteFilter = () => {
           </div>
         </template>
 
-        <!-- 密码卡片列表 -->
-        <div class="password-list" v-if="filteredPasswordList.length!=0">
-          <a-card v-for="item in filteredPasswordList" :key="item.id" class="password-item">
-            <template #title>
-              <div class="password-item-title">
-                <a-avatar shape="square" :style="{ backgroundColor: '#3370ff' }">{{ item.title.charAt(0) }}</a-avatar>
-                <span>{{ item.title }}</span>
-              </div>
-            </template>
-            <template #extra>
-              <a-space>
-                <a-button type="text" size="mini">
-                  <template #icon>
-                    <a-tooltip v-if="!item.star" content="收藏">
-                      <icon-star @click="addPasswordToStarList(item)"/>
-                    </a-tooltip>
-                    <a-tooltip v-else content="取消收藏">
-                      <icon-star-fill @click="removePasswordFromStarList(item)"/>
-                    </a-tooltip>
-                  </template>
-                </a-button>
-                <a-button type="text" size="mini">
-                  <template #icon>
-                    <a-tooltip content="复制">
-                      <icon-copy/>
-                    </a-tooltip>
-                  </template>
-                </a-button>
-                <a-button type="text" size="mini" @click="editPassword(item)">
-                  <template #icon>
-                    <a-tooltip content="修改">
-                      <icon-edit/>
-                    </a-tooltip>
-                  </template>
-                </a-button>
-                <a-button type="text" size="mini" status="danger" @click="deletePassword(item)">
-                  <template #icon>
-                    <a-tooltip content="删除">
-                      <icon-delete/>
-                    </a-tooltip>
-                  </template>
-                </a-button>
-              </a-space>
-            </template>
-            <div class="password-item-content">
-              <div class="password-item-field">
-                <span class="field-label">用户名：</span>
-                <span class="field-value">{{ item.username }}</span>
-                <a-button type="text" size="mini">
-                  <template #icon>
-                    <icon-copy/>
-                  </template>
-                </a-button>
-              </div>
-              <div class="password-item-field">
-                <span class="field-label">密码：</span>
-                <span class="field-value">{{ item.password }}</span>
-                <a-button type="text" size="mini">
-                  <template #icon>
-                    <icon-copy/>
-                  </template>
-                </a-button>
-                <a-button type="text" size="mini">
-                  <template #icon>
-                    <icon-eye/>
-                  </template>
-                </a-button>
-              </div>
+        <div v-if="lockStore.getLockState" style="display: flex;flex-direction: column;justify-content: center;align-items: center">
+          <div>
+            <icon-lock size="300"/>
+          </div>
+          <div style="color:#86909c;font-family:'华文宋体',serif"><h3>当前处于锁定状态 无法对密码进行操作!</h3></div>
 
-
-              <div class="password-item-field">
-                <span class="field-label">网站：</span>
-                <span class="field-value">{{ item.website }}</span>
-                <a-button type="text" size="mini">
-                  <template #icon>
-                    <icon-link/>
-                  </template>
-                </a-button>
-              </div>
-
-              <div class="password-item-field">
-                <span class="field-label">备注：</span>
-                <span class="field-value">{{ item.remark }}</span>
-              </div>
-              <div class="password-item-tags">
-                <a-tag v-for="tag in item.tags" :key="tag" size="small" color="arcoblue">{{ tag }}</a-tag>
-              </div>
-            </div>
-          </a-card>
         </div>
-        <div class="empty-list" v-else>
-          <div style="margin-top:1vh"><img src="https://password-xl.cn/assets/empty-Dnhuoe9-.svg" alt="none.svg"></div>
-          <div v-if="searchKeyword!==''"><h3>未查找到相关密码</h3></div>
-          <div v-else>
-            <div><h2>当前暂无密码存储</h2></div>
-            <div>
-              <a-button type="primary" size="large" style="border-radius: 15px" @click="addPassword">添加我的第一个密码
-              </a-button>
+        <div v-if="!lockStore.getLockState">
+          <!-- 密码卡片列表  不处于锁定状态-->
+          <div class="password-list" v-if="filteredPasswordList.length!=0">
+            <a-card v-for="item in filteredPasswordList" :key="item.id" class="password-item">
+              <template #title>
+                <div class="password-item-title">
+                  <a-avatar shape="square" :style="{ backgroundColor: '#3370ff' }">{{ item.title.charAt(0) }}</a-avatar>
+                  <span>{{ item.title }}</span>
+                </div>
+              </template>
+              <template #extra>
+                <a-space>
+                  <a-button type="text" size="mini">
+                    <template #icon>
+                      <a-tooltip v-if="!item.star" content="收藏">
+                        <icon-star @click="addPasswordToStarList(item)"/>
+                      </a-tooltip>
+                      <a-tooltip v-else content="取消收藏">
+                        <icon-star-fill @click="removePasswordFromStarList(item)"/>
+                      </a-tooltip>
+                    </template>
+                  </a-button>
+                  <a-button type="text" size="mini">
+                    <template #icon>
+                      <a-tooltip content="复制">
+                        <icon-copy/>
+                      </a-tooltip>
+                    </template>
+                  </a-button>
+                  <a-button type="text" size="mini" @click="editPassword(item)">
+                    <template #icon>
+                      <a-tooltip content="修改">
+                        <icon-edit/>
+                      </a-tooltip>
+                    </template>
+                  </a-button>
+                  <a-button type="text" size="mini" status="danger" @click="deletePassword(item)">
+                    <template #icon>
+                      <a-tooltip content="删除">
+                        <icon-delete/>
+                      </a-tooltip>
+                    </template>
+                  </a-button>
+                </a-space>
+              </template>
+              <div class="password-item-content">
+                <div class="password-item-field">
+                  <span class="field-label">用户名：</span>
+                  <span class="field-value">{{ item.username }}</span>
+                  <a-button type="text" size="mini">
+                    <template #icon>
+                      <icon-copy/>
+                    </template>
+                  </a-button>
+                </div>
+                <div class="password-item-field">
+                  <span class="field-label">密码：</span>
+                  <span class="field-value">{{ item.password }}</span>
+                  <a-button type="text" size="mini">
+                    <template #icon>
+                      <icon-copy/>
+                    </template>
+                  </a-button>
+                  <a-button type="text" size="mini">
+                    <template #icon>
+                      <icon-eye/>
+                    </template>
+                  </a-button>
+                </div>
+
+
+                <div class="password-item-field">
+                  <span class="field-label">网站：</span>
+                  <span class="field-value">{{ item.website }}</span>
+                  <a-button type="text" size="mini">
+                    <template #icon>
+                      <icon-link/>
+                    </template>
+                  </a-button>
+                </div>
+
+                <div class="password-item-field">
+                  <span class="field-label">备注：</span>
+                  <span class="field-value">{{ item.remark }}</span>
+                </div>
+                <div class="password-item-tags">
+                  <a-tag v-for="tag in item.tags" :key="tag" size="small" color="arcoblue">{{ tag }}</a-tag>
+                </div>
+              </div>
+            </a-card>
+          </div>
+          <div class="empty-list" v-else>
+            <div style="margin-top:1vh"><img src="https://password-xl.cn/assets/empty-Dnhuoe9-.svg" alt="none.svg">
+            </div>
+            <div v-if="searchKeyword!==''"><h3>未查找到相关密码</h3></div>
+            <div v-else>
+              <div><h2>当前暂无密码存储</h2></div>
+              <div>
+                <a-button type="primary" size="large" style="border-radius: 15px" @click="addPassword">添加我的第一个密码
+                </a-button>
+              </div>
             </div>
           </div>
-
         </div>
+
       </a-card>
     </div>
 
