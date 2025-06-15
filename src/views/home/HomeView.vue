@@ -8,7 +8,51 @@ import PasswordForm from '../../components/PasswordForm.vue';
 import {genStorageUtil} from "../../utils";
 import {useStorageClientStore} from "../../store/modules/storageClientStore.ts";
 import {useLockStore} from "../../store/modules/lockStore.ts";
+import {useListViewStore} from "../../store/modules/listview.ts";
 
+const columns = [
+  {
+    title: '标题',
+    dataIndex: 'title',
+    slotName: 'title',
+    minWidth: 140,
+  },
+  {
+    title: '用户名',
+    dataIndex: 'username',
+    slotName: 'username',
+    minWidth:250,
+  },
+  {
+    title: '密码',
+    dataIndex: 'password',
+    slotName: 'password',
+    minWidth:200,
+
+  },
+  {
+    title: '网站',
+    dataIndex: 'website',
+    slotName: 'website',
+  },
+  {
+    title: '备注',
+    dataIndex: 'remark',
+    slotName: 'remark',
+  },
+  {
+    title: '标签',
+    dataIndex: 'tags',
+    slotName: 'tags',
+  },
+  {
+    title: '操作',
+    dataIndex: 'actions',
+    slotName: 'actions',
+    align: 'center',
+  },
+];
+const listViewStore = useListViewStore();
 const storageClientStore = useStorageClientStore();
 const lockStore = useLockStore();
 const router = useRouter();
@@ -25,7 +69,6 @@ const favoriteList = ref<favoriteItemType[]>([
 const tagList = ref<tagType[]>([
   ...v
 ]);
-const passwordListView = ref<string>("card");
 
 
 // 切换密码收藏状态
@@ -74,10 +117,6 @@ const addPasswordToStarList = (item: passwordItemType) => {
 const removePasswordFromStarList = (item: passwordItemType) => {
   togglePasswordStar(item, false);
 };
-
-const changePasswordListView = () => {
-  passwordListView.value = passwordListView.value === 'card' ? 'table' : 'card';
-}
 
 
 const defaultTheme = ref<string>("line");
@@ -268,6 +307,13 @@ const generateAIPassword = () => {
   // 这里可以添加AI生成密码的逻辑
   //
 };
+
+function copyToClipboard(text: string) {
+  navigator.clipboard.writeText(text).then(() => {
+    console.log(`Copied: ${text}`);
+  });
+}
+
 // 样式绑定;
 const currentSelectedTag = ref<number | null>(null);
 const currentSelectedFavorite = ref<number | null>(null);
@@ -394,10 +440,10 @@ const cancelTagAndFavoriteFilter = () => {
               </a-button>
             </a-tooltip>
 
-            <a-tooltip :content="passwordListView === 'card' ? '切换为列表视图' : '切换为卡片视图'">
-              <a-button type="secondary" @click="changePasswordListView" size="large" style="width: 80px">
+            <a-tooltip :content="listViewStore.getViewState === 'card' ? '切换为列表视图' : '切换为卡片视图'">
+              <a-button type="secondary" @click="listViewStore.toggleViewState" size="large" style="width: 80px">
                 <template #icon>
-                  <icon-bookmark v-if="passwordListView === 'card'"/>
+                  <icon-bookmark v-if="listViewStore.getViewState === 'card'"/>
                   <icon-nav v-else/>
                 </template>
               </a-button>
@@ -439,7 +485,8 @@ const cancelTagAndFavoriteFilter = () => {
           </div>
         </template>
 
-        <div v-if="lockStore.getLockState" style="display: flex;flex-direction: column;justify-content: center;align-items: center">
+        <div v-if="lockStore.getLockState"
+             style="display: flex;flex-direction: column;justify-content: center;align-items: center">
           <div>
             <icon-lock size="300"/>
           </div>
@@ -447,9 +494,11 @@ const cancelTagAndFavoriteFilter = () => {
 
         </div>
         <div v-if="!lockStore.getLockState">
-          <!-- 密码卡片列表  不处于锁定状态-->
-          <div class="password-list" v-if="filteredPasswordList.length!=0">
-            <a-card v-for="item in filteredPasswordList" :key="item.id" class="password-item">
+          <!-- 密码列表  不处于锁定状态-->
+          <div class="password-list" v-if="filteredPasswordList.length!=0&& listViewStore.getViewState==='card'">
+            <!--            卡片视图-->
+            <a-card v-for="item in filteredPasswordList" :key="item.id"
+                    class="password-item">
               <template #title>
                 <div class="password-item-title">
                   <a-avatar shape="square" :style="{ backgroundColor: '#3370ff' }">{{ item.title.charAt(0) }}</a-avatar>
@@ -537,6 +586,99 @@ const cancelTagAndFavoriteFilter = () => {
               </div>
             </a-card>
           </div>
+
+          <div v-if="filteredPasswordList.length!=0&& listViewStore.getViewState==='table'">
+            <a-table
+                :columns="columns"
+                :data="filteredPasswordList"
+                row-key="id"
+                :pagination="false"
+            >
+              <template #title="{ record }">
+                <div class="password-item-title">
+                  <a-tag  color="arcoblue" :default-checked="true">{{ record.title }}</a-tag>
+
+                </div>
+              </template>
+
+              <template #username="{ record }">
+                <div class="field-wrapper">
+                  {{ record.username }}
+                  <a-button type="text" size="mini" @click="copyToClipboard(record.username)">
+                    <icon-copy/>
+                  </a-button>
+                </div>
+              </template>
+
+              <template #password="{ record }">
+                <div class="field-wrapper">
+                  {{ record.password }}
+                  <a-button type="text" size="mini" @click="copyToClipboard(record.password)">
+                    <icon-copy/>
+                  </a-button>
+                  <a-button type="text" size="mini">
+                    <icon-eye/>
+                  </a-button>
+                </div>
+              </template>
+
+              <template #website="{ record }">
+                <div class="field-wrapper">
+                  {{ record.website }}
+                  <a-button type="text" size="mini">
+                    <icon-link/>
+                  </a-button>
+                </div>
+              </template>
+
+              <template #remark="{ record }">
+                {{ record.remark }}
+              </template>
+
+              <template #tags="{ record }">
+                <div class="password-item-tags">
+                  <a-tag
+                      v-for="tag in record.tags"
+                      :key="tag"
+                      size="small"
+                      color="arcoblue"
+                  >
+                    {{ tag }}
+                  </a-tag>
+                </div>
+              </template>
+
+              <template #actions="{ record }">
+                <a-space>
+                  <a-button type="text" size="mini">
+                    <template #icon>
+                      <a-tooltip v-if="!record.star" content="收藏">
+                        <icon-star @click="addPasswordToStarList(record)"/>
+                      </a-tooltip>
+                      <a-tooltip v-else content="取消收藏">
+                        <icon-star-fill @click="removePasswordFromStarList(record)"/>
+                      </a-tooltip>
+                    </template>
+                  </a-button>
+                  <a-button type="text" size="mini" @click="editPassword(record)">
+                    <template #icon>
+                      <a-tooltip content="修改">
+                        <icon-edit/>
+                      </a-tooltip>
+                    </template>
+                  </a-button>
+                  <a-button type="text" size="mini" status="danger" @click="deletePassword(record)">
+                    <template #icon>
+                      <a-tooltip content="删除">
+                        <icon-delete/>
+                      </a-tooltip>
+                    </template>
+                  </a-button>
+                </a-space>
+              </template>
+            </a-table>
+          </div>
+          <!--          空密码视图-->
           <div class="empty-list" v-else>
             <div style="margin-top:1vh"><img src="https://password-xl.cn/assets/empty-Dnhuoe9-.svg" alt="none.svg">
             </div>

@@ -13,6 +13,7 @@ export const useLockStore = defineStore('lock', () => {
 
 
     return {
+        lockState,
         toggleLockState,
         getLockState
     }
