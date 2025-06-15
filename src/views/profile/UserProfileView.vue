@@ -19,7 +19,7 @@ const userInfo = reactive<User>({
 
 
 // 头像上传相关
-const avatarUrl = ref('');
+//const avatarUrl = ref('');
 const uploadLoading = ref(false);
 
 const handleAvatarUpload = async (file: FileItem) => {

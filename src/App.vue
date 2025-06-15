@@ -5,6 +5,9 @@ import {onMounted} from "vue";
 import {useStorageClientStore} from "./store/modules/storageClientStore.ts";
 
 const storageClientStore = useStorageClientStore();
+/**
+ * 初始化Client;
+ */
 onMounted(() => {
   const url = import.meta.env.VITE_SUPABASE_URL;
   const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY;

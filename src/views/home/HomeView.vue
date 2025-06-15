@@ -537,11 +537,15 @@ const cancelTagAndFavoriteFilter = () => {
         </div>
         <div class="empty-list" v-else>
           <div style="margin-top:1vh"><img src="https://password-xl.cn/assets/empty-Dnhuoe9-.svg" alt="none.svg"></div>
-          <div><h2>当前暂无密码存储</h2></div>
-          <div>
-            <a-button type="primary" size="large" style="border-radius: 15px" @click="addPassword">添加我的第一个密码
-            </a-button>
+          <div v-if="searchKeyword!==''"><h3>未查找到相关密码</h3></div>
+          <div v-else>
+            <div><h2>当前暂无密码存储</h2></div>
+            <div>
+              <a-button type="primary" size="large" style="border-radius: 15px" @click="addPassword">添加我的第一个密码
+              </a-button>
+            </div>
           </div>
+
         </div>
       </a-card>
     </div>
