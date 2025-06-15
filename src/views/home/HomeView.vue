@@ -21,13 +21,13 @@ const columns = [
     title: '用户名',
     dataIndex: 'username',
     slotName: 'username',
-    minWidth:250,
+    minWidth: 250,
   },
   {
     title: '密码',
     dataIndex: 'password',
     slotName: 'password',
-    minWidth:200,
+    minWidth: 200,
 
   },
   {
@@ -596,7 +596,7 @@ const cancelTagAndFavoriteFilter = () => {
             >
               <template #title="{ record }">
                 <div class="password-item-title">
-                  <a-tag  color="arcoblue" :default-checked="true">{{ record.title }}</a-tag>
+                  <a-tag color="arcoblue" :default-checked="true">{{ record.title }}</a-tag>
 
                 </div>
               </template>
@@ -679,41 +679,42 @@ const cancelTagAndFavoriteFilter = () => {
             </a-table>
           </div>
           <!--          空密码视图-->
-          <div class="empty-list" v-else>
-            <div style="margin-top:1vh"><img src="https://password-xl.cn/assets/empty-Dnhuoe9-.svg" alt="none.svg">
-            </div>
-            <div v-if="searchKeyword!==''"><h3>未查找到相关密码</h3></div>
-            <div v-else>
-              <div><h2>当前暂无密码存储</h2></div>
-              <div>
-                <a-button type="primary" size="large" style="border-radius: 15px" @click="addPassword">添加我的第一个密码
-                </a-button>
-              </div>
-            </div>
+          <div class="empty-list" v-if="filteredPasswordList.length===0">
+            <div style=" margin-top:1vh
+          "><img src="https://password-xl.cn/assets/empty-Dnhuoe9-.svg" alt="none.svg">
+        </div>
+        <div v-if="searchKeyword!==''"><h3>未查找到相关密码</h3></div>
+        <div v-else>
+          <div><h2>当前暂无密码存储</h2></div>
+          <div>
+            <a-button type="primary" size="large" style="border-radius: 15px" @click="addPassword">添加我的第一个密码
+            </a-button>
           </div>
         </div>
-
-      </a-card>
     </div>
+  </div>
 
-    <!-- 添加/编辑密码抽屉 -->
-    <a-drawer
-        :visible="drawerVisible"
-        :width="500"
-        :title="isEditMode ? '编辑密码' : '添加密码'"
-        :hide-cancel="true"
+  </a-card>
+  </div>
+
+  <!-- 添加/编辑密码抽屉 -->
+  <a-drawer
+      :visible="drawerVisible"
+      :width="500"
+      :title="isEditMode ? '编辑密码' : '添加密码'"
+      :hide-cancel="true"
+      @cancel="closeDrawer"
+      :footer="false"
+  >
+    <!--使用v-if 每个表单都是全新表单;-->
+    <PasswordForm
+        v-if="drawerVisible"
+        :is-edit="isEditMode"
+        :password-data="currentEditPassword"
+        @submit="handleFormSubmit"
         @cancel="closeDrawer"
-        :footer="false"
-    >
-      <!--使用v-if 每个表单都是全新表单;-->
-      <PasswordForm
-          v-if="drawerVisible"
-          :is-edit="isEditMode"
-          :password-data="currentEditPassword"
-          @submit="handleFormSubmit"
-          @cancel="closeDrawer"
-      />
-    </a-drawer>
+    />
+  </a-drawer>
   </div>
 </template>
 
