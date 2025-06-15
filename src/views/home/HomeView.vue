@@ -194,10 +194,11 @@ const handleFormSubmit = (formData: passwordItemType) => {
     }
     // 更新标签列表
     updateTagList();
-    genStorageUtil(storageClientStore.getPrefix).set<passwordItemType[]>("passwordList", passwordList.value);
-    genStorageUtil(storageClientStore.getPrefix).set<favoriteItemType[]>('favoriteList', favoriteList.value);
+
     Message.success('添加密码成功');
   }
+  genStorageUtil(storageClientStore.getPrefix).set<passwordItemType[]>("passwordList", passwordList.value);
+  genStorageUtil(storageClientStore.getPrefix).set<favoriteItemType[]>('favoriteList', favoriteList.value);
   drawerVisible.value = false;
   // current置空;
   currentEditPassword.value = null;
@@ -285,6 +286,8 @@ const filteredPasswordList = computed(() => {
     // 当没有按标签筛选也没有按收藏筛选走的方式;
     return passwordList.value;
   }
+  currentSelectedTag.value = null;
+  currentSelectedFavorite.value = null;
   // 搜索关键词筛选 使用字符串的includes API;
   const keyword = searchKeyword.value.toLowerCase();
   return passwordList.value.filter(item =>
@@ -320,10 +323,12 @@ const currentSelectedFavorite = ref<number | null>(null);
 const selectTag = (index: number) => {
   currentSelectedTag.value = index;
   currentSelectedFavorite.value = null;
+  searchKeyword.value = '';
 }
 const selectFavorite = (index: number) => {
   currentSelectedTag.value = null;
   currentSelectedFavorite.value = index;
+  searchKeyword.value = '';
 }
 const cancelTagAndFavoriteFilter = () => {
   // 都置为null;
@@ -682,39 +687,39 @@ const cancelTagAndFavoriteFilter = () => {
           <div class="empty-list" v-if="filteredPasswordList.length===0">
             <div style=" margin-top:1vh
           "><img src="https://password-xl.cn/assets/empty-Dnhuoe9-.svg" alt="none.svg">
-        </div>
-        <div v-if="searchKeyword!==''"><h3>未查找到相关密码</h3></div>
-        <div v-else>
-          <div><h2>当前暂无密码存储</h2></div>
-          <div>
-            <a-button type="primary" size="large" style="border-radius: 15px" @click="addPassword">添加我的第一个密码
-            </a-button>
+            </div>
+            <div v-if="searchKeyword!==''"><h3>未查找到相关密码</h3></div>
+            <div v-else>
+              <div><h2>当前暂无密码存储</h2></div>
+              <div>
+                <a-button type="primary" size="large" style="border-radius: 15px" @click="addPassword">添加我的第一个密码
+                </a-button>
+              </div>
+            </div>
           </div>
         </div>
+
+      </a-card>
     </div>
-  </div>
 
-  </a-card>
-  </div>
-
-  <!-- 添加/编辑密码抽屉 -->
-  <a-drawer
-      :visible="drawerVisible"
-      :width="500"
-      :title="isEditMode ? '编辑密码' : '添加密码'"
-      :hide-cancel="true"
-      @cancel="closeDrawer"
-      :footer="false"
-  >
-    <!--使用v-if 每个表单都是全新表单;-->
-    <PasswordForm
-        v-if="drawerVisible"
-        :is-edit="isEditMode"
-        :password-data="currentEditPassword"
-        @submit="handleFormSubmit"
+    <!-- 添加/编辑密码抽屉 -->
+    <a-drawer
+        :visible="drawerVisible"
+        :width="500"
+        :title="isEditMode ? '编辑密码' : '添加密码'"
+        :hide-cancel="true"
         @cancel="closeDrawer"
-    />
-  </a-drawer>
+        :footer="false"
+    >
+      <!--使用v-if 每个表单都是全新表单;-->
+      <PasswordForm
+          v-if="drawerVisible"
+          :is-edit="isEditMode"
+          :password-data="currentEditPassword"
+          @submit="handleFormSubmit"
+          @cancel="closeDrawer"
+      />
+    </a-drawer>
   </div>
 </template>
 
