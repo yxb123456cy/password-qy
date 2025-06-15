@@ -69,6 +69,7 @@ const showEditModal = () => {
   editForm.email = userInfo.email;
   editForm.phone = userInfo.phone;
   editVisible.value = true;
+
 };
 
 const handleEditSubmit = () => {
@@ -77,7 +78,7 @@ const handleEditSubmit = () => {
   userInfo.username = editForm.username;
   userInfo.email = editForm.email;
   userInfo.phone = editForm.phone;
-
+  genStorageUtil(storageClientStore.getPrefix).set<User>('user',userInfo);
   editVisible.value = false;
   Message.success('个人信息更新成功');
 };
