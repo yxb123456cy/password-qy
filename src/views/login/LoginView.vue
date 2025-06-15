@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import {reactive, ref} from "vue";
 import type {LoginOptions} from "../../models/models.ts";
-import {useRouter} from "vue-router";
 import {useBackGroundImageStore} from "../../store/modules/backgroundImageStore.ts";
-import {initialize} from "../../hooks/init/initialize.ts";
 import {useStorageClientStore} from "../../store/modules/storageClientStore.ts";
 import LoginForm from "../../components/LoginForm.vue";
 
 const storageClientStore = useStorageClientStore();
-const router = useRouter();
 const optionLogSize = ref<string>("80px");
 const optionLogHeight = ref<string>('80px');
 const LoginFormShowState = ref<boolean>(false);
